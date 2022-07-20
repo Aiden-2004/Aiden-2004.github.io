@@ -105,121 +105,6 @@
       </tags>
   </entry>
   <entry>
-    <title>3.插值算法</title>
-    <url>/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/</url>
-    <content><![CDATA[<h3 id="1-概述"><a href="#1-概述" class="headerlink" title="1. 概述"></a>1. 概述</h3><blockquote>
-<p>什么是插值算法？为什么需要插值算法？插值法分类？</p>
-</blockquote>
-<p>关于插值算法的专业定义如下：</p>
-<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625112613360.png" alt="image-20220625112613360" style="zoom: 67%;">
-
-<span id="more"></span>
-
-<ul>
-<li><p>简单来说，插值算法就是构造经过所有插值节点的函数，而与之类似的拟合并不需要经过这些点</p>
-</li>
-<li><p>当给定数据量比较少的时候，为了进行数据、模型的处理和分析，我们需要模拟产生一些新的靠谱的数据来满足数据的需求，这就是我们为什么需要进行插值（数据量比较大的时候用拟合更合适）</p>
-</li>
-<li><p>插值法主要分三类：插值多项式（构造代数多项式），分段插值，三角插值（需要用到傅里叶变换），下面仅考虑前两种插值方法</p>
-</li>
-</ul>
-<blockquote>
-<p>除了做插值来补充数据之外，插值还可以做短期数据的预测！有时效果还不错</p>
-</blockquote>
-<h3 id="2-一维插值问题"><a href="#2-一维插值问题" class="headerlink" title="2. 一维插值问题"></a>2. 一维插值问题</h3><p>一个通常遇到的问题，下面介绍解决这类插值的方法</p>
-<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625113217863.png" alt="image-20220625113217863" style="zoom: 67%;">
-
-<h4 id="（1）一般插值多项式"><a href="#（1）一般插值多项式" class="headerlink" title="（1）一般插值多项式"></a>（1）一般插值多项式</h4><img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625113552820.png" alt="image-20220625113552820" style="zoom:67%;">
-
-<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625113611867.png" alt="image-20220625113611867" style="zoom: 67%;">
-
-<h4 id="（2）拉格朗日插值法"><a href="#（2）拉格朗日插值法" class="headerlink" title="（2）拉格朗日插值法"></a>（2）拉格朗日插值法</h4><p>这种方法可以达到经过插值节点的目标，下面通过插值节点的增加阐述其思想：</p>
-<p>当插值节点数量为2时，构造下面的函数，当x&#x3D;x<del>0</del>时y0前面系数为1，y<del>1</del>前系数为0，结果为y<del>0</del>，同理当x&#x3D;x<del>1</del></p>
-<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625114506511.png" alt="image-20220625114506511" style="zoom: 50%;">
-
-<p>当插值节点数量为3时，构造下面的函数，当x&#x3D;x<del>0</del>时y0前面系数为1，y<del>1</del>前系数为0，y<del>2</del>前系数为0，结果为y<del>0</del>，其他节点同理可得</p>
-<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625114506511.png" alt="image-20220625114506511" style="zoom: 50%;">
-
-<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625115006790.png" alt="image-20220625115006790" style="zoom:50%;">
-
-<p>易知拉格朗日构造的函数结构为：对应的y<del>j</del>乘以一项，这项的分子为(x-x<del>i</del>)的乘积，分母为(x<del>j</del>-x<del>i</del>)的乘积，其中i !&#x3D;j</p>
-<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625115445016.png" alt="image-20220625115445016" style="zoom:67%;">
-
-<h4 id="（3）牛顿插值法"><a href="#（3）牛顿插值法" class="headerlink" title="（3）牛顿插值法"></a>（3）牛顿插值法</h4><img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625190328220.png" alt="image-20220625190328220" style="zoom:67%;">
-
-
-
-<blockquote>
-<p>下面对上述的拉格朗日和牛顿插值进行总结：</p>
-<ul>
-<li>与拉格朗日插值法相比，牛顿插值法的计算过程具有继承性。 （牛顿插值法每次插值只和前n项的值有关，这样每次只要在原来的函数上添加，就是说当添加一个插值节点时，拉格朗日需要重新写整个函数，而牛顿只需要添加一项</li>
-<li>都存在龙格现象：即在两端处波动极大,产生明显的震荡。故在不熟悉曲线运动趋势的前提下，不要轻易使用高次插值。</li>
-</ul>
-<p>例：对下述函数使用拉格朗日插值，观察插值得到的函数</p>
-<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625190908334.png" alt="image-20220625190908334" style="zoom:67%;">
-
-<p>下面是不同次数插值得到的效果，可以看到高次插值在两端导致震荡</p>
-<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625191036744.png" alt="image-20220625191036744" style="zoom: 67%;">
-
-<ul>
-<li>除此之外，两种插值方法仅仅要求插值多项式在插值节点处与被插函数有相等的函数值，而这种插值多项式却不能全面反映被插值函数的性态，在许多实际问题中，不仅要求插值函数与被插值函数在所有节点处有<strong>相同的函数值</strong>，它也需要在一个或全部节点上插值多项式与被插函数有<strong>相同的低阶甚至高阶的导数值</strong>，这是拉格朗日和牛顿插值法无法做到的</li>
-</ul>
-</blockquote>
-<h4 id="（4）分段线性插值"><a href="#（4）分段线性插值" class="headerlink" title="（4）分段线性插值"></a>（4）分段线性插值</h4><p>分段线性插值的思路就是相邻的两点构成一条线段，进而构成整个函数</p>
-<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625191545265.png" alt="image-20220625191545265" style="zoom:67%;">
-
-<h4 id="（5）分段二次插值"><a href="#（5）分段二次插值" class="headerlink" title="（5）分段二次插值"></a>（5）分段二次插值</h4><p>三个节点的拉格朗日+分段插值</p>
-<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625191824307.png" alt="image-20220625191824307" style="zoom: 67%;">
-
-
-
-<h4 id="（6）埃尔米特-Hermite-插值和分段三次埃尔米特插值"><a href="#（6）埃尔米特-Hermite-插值和分段三次埃尔米特插值" class="headerlink" title="（6）埃尔米特(Hermite)插值和分段三次埃尔米特插值"></a>（6）埃尔米特(Hermite)插值和分段三次埃尔米特插值</h4><p>埃尔米特插值多项式不但要求在节点上的函数值相等，而且还要求对应的导数值也相等,甚至要求高阶导数也相等，这样就解决了拉格朗日插值法和牛顿插值法的第二个缺点</p>
-<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625192150450.png" alt="image-20220625192150450" style="zoom:67%;">
-
-<p>但是直接使用Hermite插值得到的多项式次数较高，也存在着龙格现象， 因此在实际应用中，往往使用分段三次 Hermite 插值多项式 (PCHIP)。</p>
-<blockquote>
-<p>这里我们可以对原理有个大概的了解，在实现的时候matlab有函数直接调用</p>
-</blockquote>
-<figure class="highlight matlab"><table><tr><td class="code"><pre><span class="line"><span class="comment">%%matlab内置函数pchip来做分段三次埃尔米特插值</span></span><br><span class="line"><span class="comment">%%p = pchip(x,y, new_x)</span></span><br><span class="line"><span class="comment">%%x是已知的样本点的横坐标;y是已知的样本点的纵坐标;new_x是要插入处对应的横坐标</span></span><br><span class="line">x = ‐<span class="built_in">pi</span>:<span class="built_in">pi</span>; y = <span class="built_in">sin</span>(x);</span><br><span class="line">new_x = ‐<span class="built_in">pi</span>:<span class="number">0.1</span>:<span class="built_in">pi</span>;</span><br><span class="line">p = pchip(x,y,new_x);</span><br><span class="line"><span class="built_in">plot</span>(x, y, <span class="string">&#x27;o&#x27;</span>, new_x, p, <span class="string">&#x27;r‐&#x27;</span>)</span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<p>附plot函数的一点点说明</p>
-<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625193021282.png" alt="image-20220625193021282" style="zoom: 67%;">
-</blockquote>
-<h4 id="（7）三次样条插值"><a href="#（7）三次样条插值" class="headerlink" title="（7）三次样条插值"></a>（7）三次样条插值</h4><blockquote>
-<p>比埃尔米特更加苛刻的条件构造插值函数</p>
-</blockquote>
-<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625193205167.png" alt="image-20220625193205167" style="zoom:67%;">
-
-<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625193232406.png" alt="image-20220625193232406" style="zoom:67%;">
-
-<blockquote>
-<p>这里我们可以对原理有个大概的了解，在实现的时候matlab有函数直接调用</p>
-</blockquote>
-<figure class="highlight matlab"><table><tr><td class="code"><pre><span class="line"><span class="comment">%%p = spline (x,y, new_x) </span></span><br><span class="line"><span class="comment">%%x是已知的样本点的横坐标;y是已知的样本点的纵坐标;new_x是要插入处对应的横坐标</span></span><br><span class="line">x=-<span class="built_in">pi</span>:<span class="built_in">pi</span>;</span><br><span class="line">y=<span class="built_in">sin</span>(x);</span><br><span class="line">new_x=-<span class="built_in">pi</span>:<span class="number">0.1</span>:<span class="built_in">pi</span>;</span><br><span class="line">p1=pchip(x,y,new_x);</span><br><span class="line">p2=spline(x,y,new_x);</span><br><span class="line"><span class="built_in">plot</span>(x,y,<span class="string">&#x27;o&#x27;</span>,new_x,p1,<span class="string">&#x27;-r&#x27;</span>,new_x,p2,<span class="string">&#x27;-b&#x27;</span>);</span><br><span class="line"><span class="built_in">legend</span>(<span class="string">&quot;样本点&quot;</span>,<span class="string">&quot;Hermite插值&quot;</span>,<span class="string">&quot;三次样条插值&quot;</span>,<span class="string">&quot;location&quot;</span>,<span class="string">&quot;SouthEast&quot;</span>);</span><br><span class="line"><span class="comment">%%legend(string1,string2,string3, …)</span></span><br><span class="line"><span class="comment">%%分别将字符串1、字符串2、字符串3……标注到图中，每个字符串对应的图标为画图时的图标</span></span><br><span class="line"><span class="comment">%%‘Location’用来指定标注显示的位置</span></span><br></pre></td></tr></table></figure>
-
-<p>下面是画图的效果，可以看到三次样条插值的效果非常像sin函数了！</p>
-<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625193759930.png" alt="image-20220625193759930" style="zoom: 67%;">
-
-
-
-
-
-<h3 id="3-n维插值问题"><a href="#3-n维插值问题" class="headerlink" title="3. n维插值问题"></a>3. n维插值问题</h3><img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625194049036.png" alt="image-20220625194049036" style="zoom:67%;">
-
-
-
-
-
-]]></content>
-      <categories>
-        <category>数模</category>
-      </categories>
-      <tags>
-        <tag>插值与拟合</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>1.层次分析法模型</title>
     <url>/2022/06/20/1-%E5%B1%82%E6%AC%A1%E5%88%86%E6%9E%90%E6%B3%95%E6%A8%A1%E5%9E%8B/</url>
     <content><![CDATA[<h3 id="1-模型介绍"><a href="#1-模型介绍" class="headerlink" title="1. 模型介绍"></a>1. 模型介绍</h3><blockquote>
@@ -365,6 +250,121 @@
       </categories>
       <tags>
         <tag>评价类问题</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>3.插值算法</title>
+    <url>/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/</url>
+    <content><![CDATA[<h3 id="1-概述"><a href="#1-概述" class="headerlink" title="1. 概述"></a>1. 概述</h3><blockquote>
+<p>什么是插值算法？为什么需要插值算法？插值法分类？</p>
+</blockquote>
+<p>关于插值算法的专业定义如下：</p>
+<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625112613360.png" alt="image-20220625112613360" style="zoom: 67%;">
+
+<span id="more"></span>
+
+<ul>
+<li><p>简单来说，插值算法就是构造经过所有插值节点的函数，而与之类似的拟合并不需要经过这些点</p>
+</li>
+<li><p>当给定数据量比较少的时候，为了进行数据、模型的处理和分析，我们需要模拟产生一些新的靠谱的数据来满足数据的需求，这就是我们为什么需要进行插值（数据量比较大的时候用拟合更合适）</p>
+</li>
+<li><p>插值法主要分三类：插值多项式（构造代数多项式），分段插值，三角插值（需要用到傅里叶变换），下面仅考虑前两种插值方法</p>
+</li>
+</ul>
+<blockquote>
+<p>除了做插值来补充数据之外，插值还可以做短期数据的预测！有时效果还不错</p>
+</blockquote>
+<h3 id="2-一维插值问题"><a href="#2-一维插值问题" class="headerlink" title="2. 一维插值问题"></a>2. 一维插值问题</h3><p>一个通常遇到的问题，下面介绍解决这类插值的方法</p>
+<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625113217863.png" alt="image-20220625113217863" style="zoom: 67%;">
+
+<h4 id="（1）一般插值多项式"><a href="#（1）一般插值多项式" class="headerlink" title="（1）一般插值多项式"></a>（1）一般插值多项式</h4><img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625113552820.png" alt="image-20220625113552820" style="zoom:67%;">
+
+<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625113611867.png" alt="image-20220625113611867" style="zoom: 67%;">
+
+<h4 id="（2）拉格朗日插值法"><a href="#（2）拉格朗日插值法" class="headerlink" title="（2）拉格朗日插值法"></a>（2）拉格朗日插值法</h4><p>这种方法可以达到经过插值节点的目标，下面通过插值节点的增加阐述其思想：</p>
+<p>当插值节点数量为2时，构造下面的函数，当x&#x3D;x<del>0</del>时y0前面系数为1，y<del>1</del>前系数为0，结果为y<del>0</del>，同理当x&#x3D;x<del>1</del></p>
+<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625114506511.png" alt="image-20220625114506511" style="zoom: 50%;">
+
+<p>当插值节点数量为3时，构造下面的函数，当x&#x3D;x<del>0</del>时y0前面系数为1，y<del>1</del>前系数为0，y<del>2</del>前系数为0，结果为y<del>0</del>，其他节点同理可得</p>
+<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625114506511.png" alt="image-20220625114506511" style="zoom: 50%;">
+
+<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625115006790.png" alt="image-20220625115006790" style="zoom:50%;">
+
+<p>易知拉格朗日构造的函数结构为：对应的y<del>j</del>乘以一项，这项的分子为(x-x<del>i</del>)的乘积，分母为(x<del>j</del>-x<del>i</del>)的乘积，其中i !&#x3D;j</p>
+<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625115445016.png" alt="image-20220625115445016" style="zoom:67%;">
+
+<h4 id="（3）牛顿插值法"><a href="#（3）牛顿插值法" class="headerlink" title="（3）牛顿插值法"></a>（3）牛顿插值法</h4><img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625190328220.png" alt="image-20220625190328220" style="zoom:67%;">
+
+
+
+<blockquote>
+<p>下面对上述的拉格朗日和牛顿插值进行总结：</p>
+<ul>
+<li>与拉格朗日插值法相比，牛顿插值法的计算过程具有继承性。 （牛顿插值法每次插值只和前n项的值有关，这样每次只要在原来的函数上添加，就是说当添加一个插值节点时，拉格朗日需要重新写整个函数，而牛顿只需要添加一项</li>
+<li>都存在龙格现象：即在两端处波动极大,产生明显的震荡。故在不熟悉曲线运动趋势的前提下，不要轻易使用高次插值。</li>
+</ul>
+<p>例：对下述函数使用拉格朗日插值，观察插值得到的函数</p>
+<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625190908334.png" alt="image-20220625190908334" style="zoom:67%;">
+
+<p>下面是不同次数插值得到的效果，可以看到高次插值在两端导致震荡</p>
+<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625191036744.png" alt="image-20220625191036744" style="zoom: 67%;">
+
+<ul>
+<li>除此之外，两种插值方法仅仅要求插值多项式在插值节点处与被插函数有相等的函数值，而这种插值多项式却不能全面反映被插值函数的性态，在许多实际问题中，不仅要求插值函数与被插值函数在所有节点处有<strong>相同的函数值</strong>，它也需要在一个或全部节点上插值多项式与被插函数有<strong>相同的低阶甚至高阶的导数值</strong>，这是拉格朗日和牛顿插值法无法做到的</li>
+</ul>
+</blockquote>
+<h4 id="（4）分段线性插值"><a href="#（4）分段线性插值" class="headerlink" title="（4）分段线性插值"></a>（4）分段线性插值</h4><p>分段线性插值的思路就是相邻的两点构成一条线段，进而构成整个函数</p>
+<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625191545265.png" alt="image-20220625191545265" style="zoom:67%;">
+
+<h4 id="（5）分段二次插值"><a href="#（5）分段二次插值" class="headerlink" title="（5）分段二次插值"></a>（5）分段二次插值</h4><p>三个节点的拉格朗日+分段插值</p>
+<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625191824307.png" alt="image-20220625191824307" style="zoom: 67%;">
+
+
+
+<h4 id="（6）埃尔米特-Hermite-插值和分段三次埃尔米特插值"><a href="#（6）埃尔米特-Hermite-插值和分段三次埃尔米特插值" class="headerlink" title="（6）埃尔米特(Hermite)插值和分段三次埃尔米特插值"></a>（6）埃尔米特(Hermite)插值和分段三次埃尔米特插值</h4><p>埃尔米特插值多项式不但要求在节点上的函数值相等，而且还要求对应的导数值也相等,甚至要求高阶导数也相等，这样就解决了拉格朗日插值法和牛顿插值法的第二个缺点</p>
+<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625192150450.png" alt="image-20220625192150450" style="zoom:67%;">
+
+<p>但是直接使用Hermite插值得到的多项式次数较高，也存在着龙格现象， 因此在实际应用中，往往使用分段三次 Hermite 插值多项式 (PCHIP)。</p>
+<blockquote>
+<p>这里我们可以对原理有个大概的了解，在实现的时候matlab有函数直接调用</p>
+</blockquote>
+<figure class="highlight matlab"><table><tr><td class="code"><pre><span class="line"><span class="comment">%%matlab内置函数pchip来做分段三次埃尔米特插值</span></span><br><span class="line"><span class="comment">%%p = pchip(x,y, new_x)</span></span><br><span class="line"><span class="comment">%%x是已知的样本点的横坐标;y是已知的样本点的纵坐标;new_x是要插入处对应的横坐标</span></span><br><span class="line">x = ‐<span class="built_in">pi</span>:<span class="built_in">pi</span>; y = <span class="built_in">sin</span>(x);</span><br><span class="line">new_x = ‐<span class="built_in">pi</span>:<span class="number">0.1</span>:<span class="built_in">pi</span>;</span><br><span class="line">p = pchip(x,y,new_x);</span><br><span class="line"><span class="built_in">plot</span>(x, y, <span class="string">&#x27;o&#x27;</span>, new_x, p, <span class="string">&#x27;r‐&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>附plot函数的一点点说明</p>
+<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625193021282.png" alt="image-20220625193021282" style="zoom: 67%;">
+</blockquote>
+<h4 id="（7）三次样条插值"><a href="#（7）三次样条插值" class="headerlink" title="（7）三次样条插值"></a>（7）三次样条插值</h4><blockquote>
+<p>比埃尔米特更加苛刻的条件构造插值函数</p>
+</blockquote>
+<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625193205167.png" alt="image-20220625193205167" style="zoom:67%;">
+
+<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625193232406.png" alt="image-20220625193232406" style="zoom:67%;">
+
+<blockquote>
+<p>这里我们可以对原理有个大概的了解，在实现的时候matlab有函数直接调用</p>
+</blockquote>
+<figure class="highlight matlab"><table><tr><td class="code"><pre><span class="line"><span class="comment">%%p = spline (x,y, new_x) </span></span><br><span class="line"><span class="comment">%%x是已知的样本点的横坐标;y是已知的样本点的纵坐标;new_x是要插入处对应的横坐标</span></span><br><span class="line">x=-<span class="built_in">pi</span>:<span class="built_in">pi</span>;</span><br><span class="line">y=<span class="built_in">sin</span>(x);</span><br><span class="line">new_x=-<span class="built_in">pi</span>:<span class="number">0.1</span>:<span class="built_in">pi</span>;</span><br><span class="line">p1=pchip(x,y,new_x);</span><br><span class="line">p2=spline(x,y,new_x);</span><br><span class="line"><span class="built_in">plot</span>(x,y,<span class="string">&#x27;o&#x27;</span>,new_x,p1,<span class="string">&#x27;-r&#x27;</span>,new_x,p2,<span class="string">&#x27;-b&#x27;</span>);</span><br><span class="line"><span class="built_in">legend</span>(<span class="string">&quot;样本点&quot;</span>,<span class="string">&quot;Hermite插值&quot;</span>,<span class="string">&quot;三次样条插值&quot;</span>,<span class="string">&quot;location&quot;</span>,<span class="string">&quot;SouthEast&quot;</span>);</span><br><span class="line"><span class="comment">%%legend(string1,string2,string3, …)</span></span><br><span class="line"><span class="comment">%%分别将字符串1、字符串2、字符串3……标注到图中，每个字符串对应的图标为画图时的图标</span></span><br><span class="line"><span class="comment">%%‘Location’用来指定标注显示的位置</span></span><br></pre></td></tr></table></figure>
+
+<p>下面是画图的效果，可以看到三次样条插值的效果非常像sin函数了！</p>
+<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625193759930.png" alt="image-20220625193759930" style="zoom: 67%;">
+
+
+
+
+
+<h3 id="3-n维插值问题"><a href="#3-n维插值问题" class="headerlink" title="3. n维插值问题"></a>3. n维插值问题</h3><img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625194049036.png" alt="image-20220625194049036" style="zoom:67%;">
+
+
+
+
+
+]]></content>
+      <categories>
+        <category>数模</category>
+      </categories>
+      <tags>
+        <tag>插值与拟合</tag>
       </tags>
   </entry>
   <entry>
