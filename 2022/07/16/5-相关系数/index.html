@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 6.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha256-DfWjNxDkM94fVBWx1H5BMMp0Zq7luBlV8QRcSES7s+0=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"example.com","root":"/","images":"/images","scheme":"Muse","darkmode":true,"version":"8.12.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"mac"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="一、概述相关系数，衡量两个变量的相关性的大小，常用的有皮尔逊 pearson相关系数和斯皮尔曼spearman等级相关系数。在使用时，需要根据数据的条件选择不同的相关系数进行计算和分析">
+<meta property="og:type" content="article">
+<meta property="og:title" content="5.相关系数">
+<meta property="og:url" content="http://example.com/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/index.html">
+<meta property="og:site_name" content="Aiden">
+<meta property="og:description" content="一、概述相关系数，衡量两个变量的相关性的大小，常用的有皮尔逊 pearson相关系数和斯皮尔曼spearman等级相关系数。在使用时，需要根据数据的条件选择不同的相关系数进行计算和分析">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/image-20220716201625180.png">
+<meta property="og:image" content="http://example.com/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/image-20220716201954993.png">
+<meta property="og:image" content="http://example.com/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/image-20220716202033386.png">
+<meta property="og:image" content="http://example.com/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/image-20220716202311220.png">
+<meta property="og:image" content="http://example.com/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/image-20220716202654338.png">
+<meta property="og:image" content="http://example.com/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/image-20220716203212133.png">
+<meta property="og:image" content="http://example.com/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/image-20220716203306072.png">
+<meta property="og:image" content="http://example.com/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/image-20220716203348864.png">
+<meta property="og:image" content="http://example.com/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/image-20220716203756475.png">
+<meta property="og:image" content="http://example.com/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/image-20220716204127797.png">
+<meta property="og:image" content="http://example.com/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/image-20220716204318506.png">
+<meta property="og:image" content="http://example.com/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/image-20220716204422916.png">
+<meta property="og:image" content="http://example.com/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/image-20220716204624292.png">
+<meta property="og:image" content="http://example.com/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/image-20220716204821421.png">
+<meta property="og:image" content="http://example.com/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/image-20220716204946698.png">
+<meta property="og:image" content="http://example.com/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/image-20220716211443089.png">
+<meta property="og:image" content="http://example.com/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/image-20220716205607026.png">
+<meta property="og:image" content="http://example.com/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/image-20220716205629445.png">
+<meta property="og:image" content="http://example.com/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/image-20220716205705096.png">
+<meta property="og:image" content="http://example.com/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/image-20220716205725749.png">
+<meta property="og:image" content="http://example.com/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/image-20220716210508925.png">
+<meta property="og:image" content="http://example.com/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/image-20220716210815659.png">
+<meta property="og:image" content="http://example.com/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/image-20220716210859374.png">
+<meta property="og:image" content="http://example.com/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/image-20220716211713520.png">
+<meta property="og:image" content="http://example.com/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/image-20220716212125033.png">
+<meta property="og:image" content="http://example.com/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/image-20220716212433324.png">
+<meta property="og:image" content="http://example.com/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/image-20220716212601325.png">
+<meta property="article:published_time" content="2022-07-16T12:09:27.000Z">
+<meta property="article:modified_time" content="2022-07-16T13:34:56.566Z">
+<meta property="article:author" content="Aiden">
+<meta property="article:tag" content="相关系数">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/image-20220716201625180.png">
+
+
+<link rel="canonical" href="http://example.com/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://example.com/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/","path":"2022/07/16/5-相关系数/","title":"5.相关系数"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>5.相关系数 | Aiden</title>
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Aiden</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E6%A6%82%E8%BF%B0"><span class="nav-text">一、概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E4%B8%A4%E7%A7%8D%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0%E7%9A%84%E9%80%89%E6%8B%A9"><span class="nav-text">二、两种相关系数的选择</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E7%9A%AE%E5%B0%94%E9%80%8A%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0"><span class="nav-text">三、皮尔逊相关系数</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E6%A6%82%E5%BF%B5"><span class="nav-text">1.概念</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E7%BA%BF%E6%80%A7%E6%9D%A1%E4%BB%B6%E6%A3%80%E9%AA%8C"><span class="nav-text">2.线性条件检验</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%EF%BC%881%EF%BC%89%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E8%BF%9B%E8%A1%8C%E7%BA%BF%E6%80%A7%E6%A3%80%E9%AA%8C"><span class="nav-text">（1）为什么需要进行线性检验</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%EF%BC%882%EF%BC%89%E7%BA%BF%E6%80%A7%E6%A3%80%E9%AA%8C%E6%96%B9%E6%B3%95"><span class="nav-text">（2）线性检验方法</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-%E6%AD%A3%E6%80%81%E6%A3%80%E9%AA%8C"><span class="nav-text">3.正态检验</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#1%EF%BC%89JB%E6%A3%80%E9%AA%8C"><span class="nav-text">1）JB检验</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#2%EF%BC%89Shapiro-wilk%E6%A3%80%E9%AA%8C"><span class="nav-text">2）Shapiro-wilk检验</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#3%EF%BC%89Q-Q%E5%9B%BE%E6%A3%80%E9%AA%8C"><span class="nav-text">3）Q-Q图检验</span></a></li></ol></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-%E6%B1%82%E8%A7%A3%E7%9A%AE%E5%B0%94%E9%80%8A%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0"><span class="nav-text">4. 求解皮尔逊相关系数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-%E5%85%B3%E4%BA%8E%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0%E7%9A%84%E5%A4%A7%E5%B0%8F"><span class="nav-text">5.关于相关系数的大小</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#6-%E5%81%87%E8%AE%BE%E6%A3%80%E9%AA%8C"><span class="nav-text">6.假设检验</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%EF%BC%881%EF%BC%89%E6%96%B9%E6%B3%95%E4%B8%80"><span class="nav-text">（1）方法一</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%EF%BC%881%EF%BC%89%E6%96%B9%E6%B3%95%E4%BA%8C%EF%BC%9AP%E5%80%BC%E5%88%A4%E6%96%AD%E6%B3%95"><span class="nav-text">（1）方法二：P值判断法</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E6%96%AF%E7%9A%AE%E5%B0%94%E6%9B%BC%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0"><span class="nav-text">四、斯皮尔曼相关系数</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E5%8E%9F%E7%90%86"><span class="nav-text">1.原理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E5%81%87%E8%AE%BE%E6%A3%80%E9%AA%8C"><span class="nav-text">2.假设检验</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%EF%BC%881%EF%BC%89%E5%B0%8F%E6%A0%B7%E6%9C%AC%E6%83%85%E5%86%B5"><span class="nav-text">（1）小样本情况</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%EF%BC%882%EF%BC%89%E5%A4%A7%E6%A0%B7%E6%9C%AC%E6%83%85%E5%86%B5"><span class="nav-text">（2）大样本情况</span></a></li></ol></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Aiden"
+      src="/images/header.jpg">
+  <p class="site-author-name" itemprop="name">Aiden</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">6</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="Aiden">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Aiden">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="5.相关系数 | Aiden">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          5.相关系数
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2022-07-16 20:09:27 / 修改时间：21:34:56" itemprop="dateCreated datePublished" datetime="2022-07-16T20:09:27+08:00">2022-07-16</time>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>3.1k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>10 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h3 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h3><p>相关系数，衡量两个变量的相关性的大小，常用的有皮尔逊 pearson相关系数和斯皮尔曼spearman等级相关系数。在使用时，需要根据数据的条件选择不同的相关系数进行计算和分析</p>
+<span id="more"></span>
+
+<h3 id="二、两种相关系数的选择"><a href="#二、两种相关系数的选择" class="headerlink" title="二、两种相关系数的选择"></a>二、两种相关系数的选择</h3><img src="/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/image-20220716201625180.png" alt="image-20220716201625180" style="zoom: 67%;">
+
+<blockquote>
+<p>皮尔逊要求的条件比较多，需要对样本进行正态分布检验和线性关系的检验，斯皮尔曼貌似更好用啦</p>
+</blockquote>
+<h3 id="三、皮尔逊相关系数"><a href="#三、皮尔逊相关系数" class="headerlink" title="三、皮尔逊相关系数"></a>三、皮尔逊相关系数</h3><h4 id="1-概念"><a href="#1-概念" class="headerlink" title="1.概念"></a>1.概念</h4><img src="/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/image-20220716201954993.png" alt="image-20220716201954993" style="zoom:67%;">
+
+<img src="/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/image-20220716202033386.png" alt="image-20220716202033386" style="zoom:67%;">
+
+<blockquote>
+<p>皮尔逊相关系数一般就是我们常说 的相关系数，是进行标准化后的协方差（概率论）</p>
+</blockquote>
+<h4 id="2-线性条件检验"><a href="#2-线性条件检验" class="headerlink" title="2.线性条件检验"></a>2.线性条件检验</h4><h5 id="（1）为什么需要进行线性检验"><a href="#（1）为什么需要进行线性检验" class="headerlink" title="（1）为什么需要进行线性检验"></a>（1）为什么需要进行线性检验</h5><blockquote>
+<p>这一步对于皮尔逊相关系数来说是非常有必要的，如果不检验的话所得出的相关系数意义不大，理由如下</p>
+</blockquote>
+<img src="/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/image-20220716202311220.png" alt="image-20220716202311220" style="zoom:67%;">
+
+<h5 id="（2）线性检验方法"><a href="#（2）线性检验方法" class="headerlink" title="（2）线性检验方法"></a>（2）线性检验方法</h5><p>这里采用画矩阵散点图的方式进行检验，具体方法：<strong>SPSS- 图形 ‐ 旧对话框 ‐ 散点图&#x2F;点图 ‐ 矩阵散点图</strong>，下面以一组数据为例：</p>
+<img src="/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/image-20220716202654338.png" alt="image-20220716202654338" style="zoom:67%;">
+
+<p>上面这组数据看上去并不怎么相关，大多数是竖线或者横线，说明本身就没啥线性相关，计算如果有较大相关性，很可能是离散点的影响</p>
+<h4 id="3-正态检验"><a href="#3-正态检验" class="headerlink" title="3.正态检验"></a>3.正态检验</h4><p>阿巴阿巴皮尔逊要求真多，这里有三种方法进行正态检验：JB检验（样本数量要求大于30）、夏皮洛‐威尔克检验（3&lt;&#x3D;样本数量&lt;&#x3D;50）、Q-Q图(要求样本数量比较大，要个几百吧)，下面分别介绍</p>
+<h6 id="1）JB检验"><a href="#1）JB检验" class="headerlink" title="1）JB检验"></a>1）JB检验</h6><p>原理如下：</p>
+<img src="/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/image-20220716203212133.png" alt="image-20220716203212133" style="zoom:67%;">
+
+<blockquote>
+<p>其重要通过数据的偏度和峰度进行检验，关于这两个术语的介绍如下</p>
+</blockquote>
+<img src="/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/image-20220716203306072.png" alt="image-20220716203306072" style="zoom:67%;">
+
+<p>额嗯，下面代码实现最重要了：</p>
+<img src="/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/image-20220716203348864.png" alt="image-20220716203348864" style="zoom: 80%;">
+
+<blockquote>
+<p>matlab有自己的函数，注意，这里所说的原假设是指随机变量服从正态分布，也就是说如果输出h为1，就不符合正态分布了，那就不能用皮尔逊了。另外这个函数要求第一个参数是列向量，所以如果对多个进行检验，需要循环一下。如果这样输出的话，其实只看H矩阵就够了（因为P就是与0.05比较得到H的）</p>
+</blockquote>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">% 正态分布检验</span></span><br><span class="line"><span class="comment">% 检验第一列数据是否为正态分布</span></span><br><span class="line">[h,p] = jbtest(Test(:,<span class="number">1</span>),<span class="number">0.05</span>)</span><br><span class="line"><span class="comment">% 用循环检验所有列的数据</span></span><br><span class="line">n_c = <span class="built_in">size</span>(Test,<span class="number">2</span>); <span class="comment">% number of column 数据的列数</span></span><br><span class="line">H = <span class="built_in">zeros</span>(<span class="number">1</span>,<span class="number">6</span>);</span><br><span class="line">P = <span class="built_in">zeros</span>(<span class="number">1</span>,<span class="number">6</span>);</span><br><span class="line"><span class="keyword">for</span> <span class="built_in">i</span> = <span class="number">1</span>:n_c</span><br><span class="line">[h,p] = jbtest(Test(:,<span class="built_in">i</span>),<span class="number">0.05</span>);</span><br><span class="line">H(<span class="built_in">i</span>)=h;</span><br><span class="line">P(<span class="built_in">i</span>)=p;</span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"><span class="built_in">disp</span>(H)</span><br><span class="line"><span class="built_in">disp</span>(P)</span><br></pre></td></tr></table></figure>
+
+
+
+<h6 id="2）Shapiro-wilk检验"><a href="#2）Shapiro-wilk检验" class="headerlink" title="2）Shapiro-wilk检验"></a>2）Shapiro-wilk检验</h6><p>上SPSS！！！</p>
+<img src="/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/image-20220716203756475.png" alt="image-20220716203756475" style="zoom: 80%;">
+
+<p>大概可以得到下面的结果，右边框出来的就是p值啦，下图的p值都太小了，说明不服从正态分布，不能用皮尔逊</p>
+<p><img src="/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/image-20220716204127797.png" alt="image-20220716204127797"></p>
+<h6 id="3）Q-Q图检验"><a href="#3）Q-Q图检验" class="headerlink" title="3）Q-Q图检验"></a>3）Q-Q图检验</h6><img src="/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/image-20220716204318506.png" alt="image-20220716204318506" style="zoom:67%;">
+
+<p>matlab实现时是将这一列数据和正态分布比较，代码就一行</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">qqplot(Test(:,<span class="number">1</span>))</span><br></pre></td></tr></table></figure>
+
+<p>结果大概如下图所示，越接近虚线越好，下图据说不太行，这种方式如果不是数据比较大最好少用（万一看岔了呢？）</p>
+<img src="/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/image-20220716204422916.png" alt="image-20220716204422916" style="zoom:67%;">
+
+
+
+<h4 id="4-求解皮尔逊相关系数"><a href="#4-求解皮尔逊相关系数" class="headerlink" title="4. 求解皮尔逊相关系数"></a>4. 求解皮尔逊相关系数</h4><img src="/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/image-20220716204624292.png" alt="image-20220716204624292" style="zoom:67%;">
+
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">R = corrcoef(Test)   <span class="comment">% correlation coefficient</span></span><br></pre></td></tr></table></figure>
+
+<p>现在得到了一张相关系数表，但是可以进一步美化一下，这里用到了excel！！！，先把数据导过去然后：</p>
+<img src="/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/image-20220716204821421.png" alt="image-20220716204821421" style="zoom: 67%;">
+
+<h4 id="5-关于相关系数的大小"><a href="#5-关于相关系数的大小" class="headerlink" title="5.关于相关系数的大小"></a>5.关于相关系数的大小</h4><img src="/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/image-20220716204946698.png" alt="image-20220716204946698" style="zoom:67%;">
+
+<blockquote>
+<p>如上所说，我们更关注假设检验，就是概率论里面的那个假设检验</p>
+</blockquote>
+<h4 id="6-假设检验"><a href="#6-假设检验" class="headerlink" title="6.假设检验"></a>6.假设检验</h4><blockquote>
+<p>从上面得到了相关系数，由相关系数的定义可知，若相关系数越靠近0，则没有什么相关性，所以我们下面通过假设检验判断相关系数是否显著地不等于0</p>
+</blockquote>
+<p>皮尔逊相关系数假设检验是有条件的，这也是之前进行选择的部分原因，下面是其假设检验的要求，主要需要考虑第一点 </p>
+<img src="/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/image-20220716211443089.png" alt="image-20220716211443089" style="zoom:67%;">
+
+<h5 id="（1）方法一"><a href="#（1）方法一" class="headerlink" title="（1）方法一"></a>（1）方法一</h5><img src="/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/image-20220716205607026.png" alt="image-20220716205607026" style="zoom:80%;">
+
+<img src="/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/image-20220716205629445.png" alt="image-20220716205629445" style="zoom:80%;">
+
+<img src="/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/image-20220716205705096.png" alt="image-20220716205705096" style="zoom:80%;">
+
+<img src="/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/image-20220716205725749.png" alt="image-20220716205725749" style="zoom: 80%;">
+
+<p>这种方法多少有点麻烦，用的就是我们概率论的东西，代码如下啦：</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">x = <span class="number">-4</span>:<span class="number">0.1</span>:<span class="number">4</span>;</span><br><span class="line">y = tpdf(x,<span class="number">28</span>);  <span class="comment">%求t分布的概率密度值 28是自由度  </span></span><br><span class="line"><span class="built_in">figure</span>(<span class="number">1</span>)</span><br><span class="line"><span class="built_in">plot</span>(x,y,<span class="string">&#x27;-&#x27;</span>)</span><br><span class="line">grid on  <span class="comment">% 在画出的图上加上网格线</span></span><br><span class="line"><span class="built_in">hold</span> on  <span class="comment">% 保留原来的图，以便继续在上面操作</span></span><br><span class="line"><span class="comment">% matlab可以求出临界值，函数如下</span></span><br><span class="line">tinv(<span class="number">0.975</span>,<span class="number">28</span>)    <span class="comment">% 得到2.0484,因为置信水平是0.95，所以右边界是0.975，另一个参数是自由度</span></span><br><span class="line"><span class="comment">% 这个函数是累积密度函数cdf的反函数</span></span><br><span class="line"><span class="built_in">plot</span>([<span class="number">-2.048</span>,<span class="number">-2.048</span>],[<span class="number">0</span>,tpdf(<span class="number">-2.048</span>,<span class="number">28</span>)],<span class="string">&#x27;r-&#x27;</span>)<span class="comment">%%这里画出了图中的两条拒绝域和接受域直接的竖线</span></span><br><span class="line"><span class="built_in">plot</span>([<span class="number">2.048</span>,<span class="number">2.048</span>],[<span class="number">0</span>,tpdf(<span class="number">2.048</span>,<span class="number">28</span>)],<span class="string">&#x27;r-&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+
+
+<h5 id="（1）方法二：P值判断法"><a href="#（1）方法二：P值判断法" class="headerlink" title="（1）方法二：P值判断法"></a>（1）方法二：P值判断法</h5><blockquote>
+<p>所谓P值，就是逆过程啦，之前是求置信区间然后带入检验值再检验，现在通过检验值得到区间大小，通过区间大小来判断是否满足</p>
+</blockquote>
+<p>首先带入检验值到公式之中，然后求P值，最后将其与0.01,0.05,0.1判断，注意这里原假设说的是r&#x3D;0，拒绝原假设就是说相关系数与0显著性不等</p>
+<img src="/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/image-20220716210508925.png" alt="image-20220716210508925" style="zoom:67%;">
+
+<p>代码实现如下：</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">%% 计算p值</span></span><br><span class="line">x = <span class="number">-4</span>:<span class="number">0.1</span>:<span class="number">4</span>;</span><br><span class="line">y = tpdf(x,<span class="number">28</span>);</span><br><span class="line"><span class="built_in">figure</span>(<span class="number">2</span>)</span><br><span class="line"><span class="built_in">plot</span>(x,y,<span class="string">&#x27;-&#x27;</span>)</span><br><span class="line">grid on </span><br><span class="line"><span class="built_in">hold</span> on</span><br><span class="line"><span class="comment">% 画线段的方法</span></span><br><span class="line"><span class="built_in">plot</span>([<span class="number">-3.055</span>,<span class="number">-3.055</span>],[<span class="number">0</span>,tpdf(<span class="number">-3.055</span>,<span class="number">28</span>)],<span class="string">&#x27;r-&#x27;</span>)</span><br><span class="line"><span class="built_in">plot</span>([<span class="number">3.055</span>,<span class="number">3.055</span>],[<span class="number">0</span>,tpdf(<span class="number">3.055</span>,<span class="number">28</span>)],<span class="string">&#x27;r-&#x27;</span>)</span><br><span class="line"><span class="built_in">disp</span>(<span class="string">&#x27;该检验值对应的p值为：&#x27;</span>)</span><br><span class="line"><span class="built_in">disp</span>((<span class="number">1</span>-tcdf(<span class="number">3.055</span>,<span class="number">28</span>))*<span class="number">2</span>)  <span class="comment">%双侧检验的p值要乘以2</span></span><br><span class="line"></span><br><span class="line"><span class="comment">%% 计算各列之间的相关系数以及p值</span></span><br><span class="line">[R,P] = corrcoef(Test)</span><br><span class="line"><span class="comment">% 在EXCEL表格中给数据右上角标上显著性符号吧</span></span><br><span class="line">P &lt; <span class="number">0.01</span>  <span class="comment">% 标记3颗星的位置</span></span><br><span class="line">(P &lt; <span class="number">0.05</span>) .* (P &gt; <span class="number">0.01</span>)  <span class="comment">% 标记2颗星的位置</span></span><br><span class="line">(P &lt; <span class="number">0.1</span>) .* (P &gt; <span class="number">0.05</span>) <span class="comment">% % 标记1颗星的位置</span></span><br></pre></td></tr></table></figure>
+
+<p>当然也可以直接上SPSS，操作如下：</p>
+<img src="/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/image-20220716210815659.png" alt="image-20220716210815659" style="zoom:50%;">
+
+<p><img src="/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/image-20220716210859374.png" alt="image-20220716210859374"></p>
+<p>后面的斯皮尔曼也可以用SPSS直接得到呀，双尾说的是双侧的假设检验，因为我们这里是检验r&#x3D;0,所以是双侧的，标记显著性体现了显著性程度，0.5、0.5* 、0.5**、0.5***，分别表示接受原假设，90%置信水平上拒绝原假设，95%置信水平上拒绝原假设,…（当然SPSS定义略有不同）</p>
+<h3 id="四、斯皮尔曼相关系数"><a href="#四、斯皮尔曼相关系数" class="headerlink" title="四、斯皮尔曼相关系数"></a>四、斯皮尔曼相关系数</h3><h4 id="1-原理"><a href="#1-原理" class="headerlink" title="1.原理"></a>1.原理</h4><img src="/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/image-20220716211713520.png" alt="image-20220716211713520" style="zoom:67%;">
+
+<p>先要求出两列数各自的等级向量，然后再计算斯皮尔曼相关系数，若两者同序排列（正相关），则数值越靠近1，否则如果逆序，则越接近-1</p>
+<blockquote>
+<p>但是matlab里定义的是等级之间的皮尔逊相关系数，所得结果差别不大</p>
+</blockquote>
+<img src="/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/image-20220716212125033.png" alt="image-20220716212125033" style="zoom:67%;">
+
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">%% 斯皮尔曼相关系数</span></span><br><span class="line">X = [<span class="number">3</span> <span class="number">8</span> <span class="number">4</span> <span class="number">7</span> <span class="number">2</span>]&#x27;  <span class="comment">% 一定要是列向量哦，一撇&#x27;表示求转置</span></span><br><span class="line">Y = [<span class="number">5</span> <span class="number">10</span> <span class="number">9</span> <span class="number">10</span> <span class="number">6</span>]&#x27;</span><br><span class="line"><span class="comment">% 第一种计算方法</span></span><br><span class="line"><span class="number">1</span><span class="number">-6</span>*(<span class="number">1</span>+<span class="number">0.25</span>+<span class="number">0.25</span>+<span class="number">1</span>)/<span class="number">5</span>/<span class="number">24</span></span><br><span class="line"></span><br><span class="line"><span class="comment">% 第二种计算方法</span></span><br><span class="line">coeff = corr(X , Y , <span class="string">&#x27;type&#x27;</span> , <span class="string">&#x27;Spearman&#x27;</span>)</span><br><span class="line"><span class="comment">% 等价于：</span></span><br><span class="line">RX = [<span class="number">2</span> <span class="number">5</span> <span class="number">3</span> <span class="number">4</span> <span class="number">1</span>]</span><br><span class="line">RY = [<span class="number">1</span> <span class="number">4.5</span> <span class="number">3</span> <span class="number">4.5</span> <span class="number">2</span>]</span><br><span class="line">R = corrcoef(RX,RY)</span><br><span class="line"></span><br><span class="line"><span class="comment">% 计算矩阵各列的斯皮尔曼相关系数</span></span><br><span class="line">R = corr(Test, <span class="string">&#x27;type&#x27;</span> , <span class="string">&#x27;Spearman&#x27;</span>)<span class="comment">%%这种当然最好用啦</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="2-假设检验"><a href="#2-假设检验" class="headerlink" title="2.假设检验"></a>2.假设检验</h4><p>分为小样本（n&lt;&#x3D;30）和大样本情况</p>
+<h5 id="（1）小样本情况"><a href="#（1）小样本情况" class="headerlink" title="（1）小样本情况"></a>（1）小样本情况</h5><p>直接查临界值表即可，左侧为样本数量，上测为显著水平</p>
+<img src="/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/image-20220716212433324.png" alt="image-20220716212433324" style="zoom:67%;">
+
+<h5 id="（2）大样本情况"><a href="#（2）大样本情况" class="headerlink" title="（2）大样本情况"></a>（2）大样本情况</h5><img src="/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/image-20220716212601325.png" alt="image-20220716212601325" style="zoom: 67%;">
+
+
+
+<p>在实现的过程中，大可不必如此，下面直接给出了相关系数和P值，判断和0.05的大小就可以啦</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[R,P]=corr(Test, <span class="string">&#x27;type&#x27;</span> , <span class="string">&#x27;Spearman&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+
+
+<p>（当然你也可以直接用SPSS，这样还简单&#x2F;doge)</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/" rel="tag"># 相关系数</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2022/06/26/4-%E6%8B%9F%E5%90%88%E7%AE%97%E6%B3%95/" rel="prev" title="4.拟合算法">
+                  <i class="fa fa-chevron-left"></i> 4.拟合算法
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2022/07/17/6-%E5%85%B8%E5%9E%8B%E7%9B%B8%E5%85%B3%E5%88%86%E6%9E%90/" rel="next" title="6.典型相关分析">
+                  6.典型相关分析 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Aiden</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">16k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">54 分钟</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+<!--
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+-->
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+</body>
+</html>

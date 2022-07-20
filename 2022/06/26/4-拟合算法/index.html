@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 6.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha256-DfWjNxDkM94fVBWx1H5BMMp0Zq7luBlV8QRcSES7s+0=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"example.com","root":"/","images":"/images","scheme":"Muse","darkmode":true,"version":"8.12.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"mac"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="1. 概述拟合的目标是寻找一个函数（曲线），使得该曲线在某种准则下与所有数据点最为接近，即曲线拟合的最好（最小化损失函数）  插值和拟合的区别 插值算法中，若使用多项式插值，得到的函数要经过所有样本点，如果样本点太多，多项式次数较高，则可能造成龙格现象 为了避免龙格现象，我们使用了分段的方法，但是当样本点较多时，分段得到的函数过于复杂，而我们很多时候并不需要保证曲线经过每个样本点，只需要保证误差足">
+<meta property="og:type" content="article">
+<meta property="og:title" content="4.拟合算法">
+<meta property="og:url" content="http://example.com/2022/06/26/4-%E6%8B%9F%E5%90%88%E7%AE%97%E6%B3%95/index.html">
+<meta property="og:site_name" content="Aiden">
+<meta property="og:description" content="1. 概述拟合的目标是寻找一个函数（曲线），使得该曲线在某种准则下与所有数据点最为接近，即曲线拟合的最好（最小化损失函数）  插值和拟合的区别 插值算法中，若使用多项式插值，得到的函数要经过所有样本点，如果样本点太多，多项式次数较高，则可能造成龙格现象 为了避免龙格现象，我们使用了分段的方法，但是当样本点较多时，分段得到的函数过于复杂，而我们很多时候并不需要保证曲线经过每个样本点，只需要保证误差足">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2022/06/26/4-%E6%8B%9F%E5%90%88%E7%AE%97%E6%B3%95/image-20220629084011088.png">
+<meta property="og:image" content="http://example.com/2022/06/26/4-%E6%8B%9F%E5%90%88%E7%AE%97%E6%B3%95/data2-16564635768302.jpg">
+<meta property="og:image" content="http://example.com/2022/06/26/4-%E6%8B%9F%E5%90%88%E7%AE%97%E6%B3%95/image-20220629105801498.png">
+<meta property="og:image" content="http://example.com/2022/06/26/4-%E6%8B%9F%E5%90%88%E7%AE%97%E6%B3%95/image-20220629110959206.png">
+<meta property="og:image" content="http://example.com/2022/06/26/4-%E6%8B%9F%E5%90%88%E7%AE%97%E6%B3%95/image-20220629115106426.png">
+<meta property="og:image" content="http://example.com/2022/06/26/4-%E6%8B%9F%E5%90%88%E7%AE%97%E6%B3%95/image-20220629150919377.png">
+<meta property="og:image" content="http://example.com/2022/06/26/4-%E6%8B%9F%E5%90%88%E7%AE%97%E6%B3%95/image-20220629151314745.png">
+<meta property="og:image" content="http://example.com/2022/06/26/4-%E6%8B%9F%E5%90%88%E7%AE%97%E6%B3%95/image-20220629112406980.png">
+<meta property="og:image" content="http://example.com/2022/06/26/4-%E6%8B%9F%E5%90%88%E7%AE%97%E6%B3%95/image-20220629112434307.png">
+<meta property="og:image" content="http://example.com/2022/06/26/4-%E6%8B%9F%E5%90%88%E7%AE%97%E6%B3%95/image-20220629153510781.png">
+<meta property="og:image" content="http://example.com/2022/06/26/4-%E6%8B%9F%E5%90%88%E7%AE%97%E6%B3%95/image-20220629154027822.png">
+<meta property="og:image" content="http://example.com/2022/06/26/4-%E6%8B%9F%E5%90%88%E7%AE%97%E6%B3%95/image-20220629155353868.png">
+<meta property="article:published_time" content="2022-06-26T14:33:00.000Z">
+<meta property="article:modified_time" content="2022-06-29T07:56:05.596Z">
+<meta property="article:author" content="Aiden">
+<meta property="article:tag" content="插值与拟合">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2022/06/26/4-%E6%8B%9F%E5%90%88%E7%AE%97%E6%B3%95/image-20220629084011088.png">
+
+
+<link rel="canonical" href="http://example.com/2022/06/26/4-%E6%8B%9F%E5%90%88%E7%AE%97%E6%B3%95/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://example.com/2022/06/26/4-%E6%8B%9F%E5%90%88%E7%AE%97%E6%B3%95/","path":"2022/06/26/4-拟合算法/","title":"4.拟合算法"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>4.拟合算法 | Aiden</title>
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Aiden</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E6%A6%82%E8%BF%B0"><span class="nav-text">1. 概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E6%8B%9F%E5%90%88%E7%9A%84%E8%BF%87%E7%A8%8B"><span class="nav-text">2. 拟合的过程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%EF%BC%881%EF%BC%89%E7%A1%AE%E5%AE%9A%E6%8B%9F%E5%90%88%E6%9B%B2%E7%BA%BF%E7%B1%BB%E5%9E%8B"><span class="nav-text">（1）确定拟合曲线类型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%EF%BC%882%EF%BC%89%E7%A1%AE%E5%AE%9A%E6%8B%9F%E5%90%88%E6%9B%B2%E7%BA%BF%E5%8F%82%E6%95%B0"><span class="nav-text">（2）确定拟合曲线参数</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1%EF%BC%89%E6%9C%80%E5%B0%8F%E4%BA%8C%E4%B9%98%E6%B3%95"><span class="nav-text">1）最小二乘法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2%EF%BC%89%E6%B1%82%E8%A7%A3%E6%9C%80%E5%B0%8F%E4%BA%8C%E4%B9%98%E6%B3%95"><span class="nav-text">2）求解最小二乘法</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%EF%BC%883%EF%BC%89%E8%AF%84%E4%BC%B0%E6%8B%9F%E5%90%88%E6%95%88%E6%9E%9C"><span class="nav-text">（3）评估拟合效果</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1%EF%BC%89%E8%AF%84%E4%BB%B7%E6%89%80%E9%9C%80%E6%8C%87%E6%A0%87"><span class="nav-text">1）评价所需指标</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2%EF%BC%89%E7%BA%BF%E6%80%A7%E5%87%BD%E6%95%B0%E8%AF%84%E4%BB%B7%E6%8C%87%E6%A0%87R-2"><span class="nav-text">2）线性函数评价指标R^2^</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3%EF%BC%89%E9%9D%9E%E7%BA%BF%E6%80%A7%E5%87%BD%E6%95%B0"><span class="nav-text">3）非线性函数</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-cftool%E5%B7%A5%E5%85%B7%E7%AE%B1"><span class="nav-text">3. cftool工具箱</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Aiden"
+      src="/images/header.jpg">
+  <p class="site-author-name" itemprop="name">Aiden</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">6</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/06/26/4-%E6%8B%9F%E5%90%88%E7%AE%97%E6%B3%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="Aiden">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Aiden">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="4.拟合算法 | Aiden">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          4.拟合算法
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-06-26 22:33:00" itemprop="dateCreated datePublished" datetime="2022-06-26T22:33:00+08:00">2022-06-26</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2022-06-29 15:56:05" itemprop="dateModified" datetime="2022-06-29T15:56:05+08:00">2022-06-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%95%B0%E6%A8%A1/" itemprop="url" rel="index"><span itemprop="name">数模</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.2k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>7 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h3 id="1-概述"><a href="#1-概述" class="headerlink" title="1. 概述"></a>1. 概述</h3><p>拟合的目标是寻找一个函数（曲线），使得该曲线在某种准则下与所有数据点最为接近，即曲线拟合的最好（最小化损失函数）</p>
+<blockquote>
+<p>插值和拟合的区别</p>
+<p>插值算法中，若使用多项式插值，得到的函数要经过所有样本点，如果样本点太多，多项式次数较高，则可能造成龙格现象</p>
+<p>为了避免龙格现象，我们使用了分段的方法，但是当样本点较多时，分段得到的函数过于复杂，而我们很多时候并不需要保证曲线经过每个样本点，只需要保证误差足够小，这就是拟合的思想</p>
+</blockquote>
+<span id="more"></span>
+
+<h3 id="2-拟合的过程"><a href="#2-拟合的过程" class="headerlink" title="2. 拟合的过程"></a>2. 拟合的过程</h3><h4 id="（1）确定拟合曲线类型"><a href="#（1）确定拟合曲线类型" class="headerlink" title="（1）确定拟合曲线类型"></a>（1）确定拟合曲线类型</h4><ul>
+<li>首先画出散点图，观摩一下曲线的类型，下面这种就是一次函数啦！</li>
+</ul>
+<p><img src="/2022/06/26/4-%E6%8B%9F%E5%90%88%E7%AE%97%E6%B3%95/image-20220629084011088.png" alt="image-20220629084011088" style="zoom:66%;"><img src="/2022/06/26/4-%E6%8B%9F%E5%90%88%E7%AE%97%E6%B3%95/data2-16564635768302.jpg" alt="data2" style="zoom: 15%;"></p>
+<ul>
+<li>如果题目给了拟合函数，就用题目给的</li>
+</ul>
+<h4 id="（2）确定拟合曲线参数"><a href="#（2）确定拟合曲线参数" class="headerlink" title="（2）确定拟合曲线参数"></a>（2）确定拟合曲线参数</h4><blockquote>
+<p>拟合的思想是在某种准则下误差最小，所得曲线与数据点最接近，首先我们需要构建这一准则，去衡量误差，在机器学习上叫做损失函数，下面就用机器学习的称呼吧</p>
+</blockquote>
+<h5 id="1）最小二乘法"><a href="#1）最小二乘法" class="headerlink" title="1）最小二乘法"></a>1）最小二乘法</h5><img src="/2022/06/26/4-%E6%8B%9F%E5%90%88%E7%AE%97%E6%B3%95/image-20220629105801498.png" alt="image-20220629105801498" style="zoom:67%;">
+
+<p>衡量数据点和拟合所得的误差，第一种方法是绝对值，将绝对值相加之和，第二种是以平方的方式将距离相加，我们将使用平方来作为损失函数</p>
+<blockquote>
+<p>在实现最小二乘法时常使用第二种方法，因为对于损失函数，我们需要对其进行求导，而绝对值不适合求导，故平方要优于绝对值，为什么不使用3次方呢？因为奇数次方将会导致正负相抵，为什么不使用更高的偶次方呢？1）避免极端数据对拟合曲线的影响 2）使用平方的最小二乘法得到的结果与MLE极大似然估计一致</p>
+</blockquote>
+<h5 id="2）求解最小二乘法"><a href="#2）求解最小二乘法" class="headerlink" title="2）求解最小二乘法"></a>2）求解最小二乘法</h5><p>下面以一次函数为例求解最小二乘法，对于更加复杂的函数可以直接使用cftool工具箱</p>
+<img src="/2022/06/26/4-%E6%8B%9F%E5%90%88%E7%AE%97%E6%B3%95/image-20220629110959206.png" alt="image-20220629110959206" style="zoom:67%;">
+
+<p>下面是求参数k和参数b的代码实现</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">clc;clear</span><br><span class="line">n=<span class="built_in">size</span>(x,<span class="number">1</span>);</span><br><span class="line">k=(n*sum(x.*y)-sum(x)*sum(y))/(n*sum(x.*x)-sum(x)*sum(x));</span><br><span class="line">b=(sum(x.*x)*sum(y)-sum(x)*sum(x.*y))/(n*sum(x.*x)-sum(x)*sum(x));</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="（3）评估拟合效果"><a href="#（3）评估拟合效果" class="headerlink" title="（3）评估拟合效果"></a>（3）评估拟合效果</h4><h5 id="1）评价所需指标"><a href="#1）评价所需指标" class="headerlink" title="1）评价所需指标"></a>1）评价所需指标</h5><img src="/2022/06/26/4-%E6%8B%9F%E5%90%88%E7%AE%97%E6%B3%95/image-20220629115106426.png" alt="image-20220629115106426" style="zoom: 67%;">
+
+<p>上述指标中，SSE直接计算了数据值和拟合值之间的平方差，可以作为评估误差的量度，但由于有量纲的影响，单独看一种拟合的SSE无法判断其拟合效果，对于线性函数，可以使用R^2^来直接刻画这一误差，对于非线性函数，直接使用SSE来评估误差，此时R^2^已不能作为评判指标</p>
+<h5 id="2）线性函数评价指标R-2"><a href="#2）线性函数评价指标R-2" class="headerlink" title="2）线性函数评价指标R^2^"></a>2）线性函数评价指标R^2^</h5><ul>
+<li>对于线性函数，我们可以使用R^2^来对拟合结果进行评价，其值越接近1，说明误差平方和越接近0，误差越小</li>
+</ul>
+<img src="/2022/06/26/4-%E6%8B%9F%E5%90%88%E7%AE%97%E6%B3%95/image-20220629150919377.png" alt="image-20220629150919377" style="zoom: 67%;">
+
+<blockquote>
+<p>需要注意的是，<code>SST=SSE+SSR</code>等式仅在函数为线性函数情况下满足，具体以<code>y=kx+b</code>为例的推导过程如下：</p>
+</blockquote>
+<img src="/2022/06/26/4-%E6%8B%9F%E5%90%88%E7%AE%97%E6%B3%95/image-20220629151314745.png" alt="image-20220629151314745" style="zoom: 67%;">
+
+<blockquote>
+<p>这里所说的线性函数与我们常说的不同，我们常说的是对变量而言是线性的，而这里说的是对参数而言是线性的</p>
+</blockquote>
+<img src="/2022/06/26/4-%E6%8B%9F%E5%90%88%E7%AE%97%E6%B3%95/image-20220629112406980.png" alt="image-20220629112406980" style="zoom: 67%;">
+
+<img src="/2022/06/26/4-%E6%8B%9F%E5%90%88%E7%AE%97%E6%B3%95/image-20220629112434307.png" alt="image-20220629112434307" style="zoom: 67%;">
+
+<h5 id="3）非线性函数"><a href="#3）非线性函数" class="headerlink" title="3）非线性函数"></a>3）非线性函数</h5><ul>
+<li>对于非线性函数，我们可以直接使用误差平方和来进行评估即可</li>
+</ul>
+<p>下面给出计算上述指标的代码：</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">y_hat=k*x+b;</span><br><span class="line">SSR=sum((y_hat-<span class="built_in">mean</span>(y)).^<span class="number">2</span>);</span><br><span class="line">SSE=sum((y-y_hat).^<span class="number">2</span>);</span><br><span class="line">SST=sum((y-<span class="built_in">mean</span>(y)).^<span class="number">2</span>);</span><br><span class="line">R_2=SSR/SST;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="3-cftool工具箱"><a href="#3-cftool工具箱" class="headerlink" title="3. cftool工具箱"></a>3. cftool工具箱</h3><p>命令行输入<code>cftool</code>，界面如下所示</p>
+<p><img src="/2022/06/26/4-%E6%8B%9F%E5%90%88%E7%AE%97%E6%B3%95/image-20220629153510781.png" alt="image-20220629153510781"></p>
+<p>这里给出一些使用上的建议：</p>
+<ol>
+<li>对于自定义函数，需要自己尝试一些参数</li>
+</ol>
+<img src="/2022/06/26/4-%E6%8B%9F%E5%90%88%E7%AE%97%E6%B3%95/image-20220629154027822.png" alt="image-20220629154027822" style="zoom: 67%;">
+
+<ol start="2">
+<li>cftool可以自动生成代码，文件-&gt;generate code，例如上图得到以下函数</li>
+</ol>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="params">[fitresult, gof]</span> = <span class="title">createFit</span><span class="params">(X, Y)</span></span></span><br><span class="line">[xData, yData] = prepareCurveData( X, Y );</span><br><span class="line"><span class="comment">% Set up fittype and options.</span></span><br><span class="line">ft = fittype( &#123;<span class="string">&#x27;(sin(x-pi))&#x27;</span>, <span class="string">&#x27;((x-10)^2)&#x27;</span>, <span class="string">&#x27;1&#x27;</span>&#125;, <span class="string">&#x27;independent&#x27;</span>, <span class="string">&#x27;x&#x27;</span>, <span class="string">&#x27;dependent&#x27;</span>, <span class="string">&#x27;y&#x27;</span>, <span class="string">&#x27;coefficients&#x27;</span>, &#123;<span class="string">&#x27;a&#x27;</span>, <span class="string">&#x27;b&#x27;</span>, <span class="string">&#x27;c&#x27;</span>&#125; );</span><br><span class="line"><span class="comment">% Fit model to data.</span></span><br><span class="line">[fitresult, gof] = fit( xData, yData, ft );</span><br><span class="line"><span class="comment">% Plot fit with data.</span></span><br><span class="line"><span class="built_in">figure</span>( <span class="string">&#x27;Name&#x27;</span>, <span class="string">&#x27;untitled fit 1&#x27;</span> );</span><br><span class="line">h = <span class="built_in">plot</span>( fitresult, xData, yData );</span><br><span class="line"><span class="built_in">legend</span>( h, <span class="string">&#x27;Y vs. X&#x27;</span>, <span class="string">&#x27;untitled fit 1&#x27;</span>, <span class="string">&#x27;Location&#x27;</span>, <span class="string">&#x27;NorthEast&#x27;</span>, <span class="string">&#x27;Interpreter&#x27;</span>, <span class="string">&#x27;none&#x27;</span> );</span><br><span class="line"><span class="comment">% Label axes</span></span><br><span class="line">xlabel( <span class="string">&#x27;X&#x27;</span>, <span class="string">&#x27;Interpreter&#x27;</span>, <span class="string">&#x27;none&#x27;</span> );</span><br><span class="line">ylabel( <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Interpreter&#x27;</span>, <span class="string">&#x27;none&#x27;</span> );</span><br><span class="line">grid on</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li><p>这样生成的代码使用的时候直接粘function后面的一部分就行，即<code>[fitresult, gof] = createFit(X, Y)</code></p>
+</li>
+<li><p>下面的函数可以生成随机数据，可以用于模拟</p>
+</li>
+</ol>
+<img src="/2022/06/26/4-%E6%8B%9F%E5%90%88%E7%AE%97%E6%B3%95/image-20220629155353868.png" alt="image-20220629155353868" style="zoom:67%;">
+
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%8F%92%E5%80%BC%E4%B8%8E%E6%8B%9F%E5%90%88/" rel="tag"># 插值与拟合</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/" rel="prev" title="3.插值算法">
+                  <i class="fa fa-chevron-left"></i> 3.插值算法
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2022/07/16/5-%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0/" rel="next" title="5.相关系数">
+                  5.相关系数 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Aiden</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">16k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">54 分钟</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+<!--
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+-->
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+</body>
+</html>

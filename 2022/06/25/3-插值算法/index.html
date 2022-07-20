@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 6.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha256-DfWjNxDkM94fVBWx1H5BMMp0Zq7luBlV8QRcSES7s+0=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"example.com","root":"/","images":"/images","scheme":"Muse","darkmode":true,"version":"8.12.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"mac"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="1. 概述 什么是插值算法？为什么需要插值算法？插值法分类？  关于插值算法的专业定义如下：">
+<meta property="og:type" content="article">
+<meta property="og:title" content="3.插值算法">
+<meta property="og:url" content="http://example.com/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/index.html">
+<meta property="og:site_name" content="Aiden">
+<meta property="og:description" content="1. 概述 什么是插值算法？为什么需要插值算法？插值法分类？  关于插值算法的专业定义如下：">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625112613360.png">
+<meta property="og:image" content="http://example.com/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625113217863.png">
+<meta property="og:image" content="http://example.com/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625113552820.png">
+<meta property="og:image" content="http://example.com/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625113611867.png">
+<meta property="og:image" content="http://example.com/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625114506511.png">
+<meta property="og:image" content="http://example.com/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625114506511.png">
+<meta property="og:image" content="http://example.com/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625115006790.png">
+<meta property="og:image" content="http://example.com/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625115445016.png">
+<meta property="og:image" content="http://example.com/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625190328220.png">
+<meta property="og:image" content="http://example.com/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625190908334.png">
+<meta property="og:image" content="http://example.com/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625191036744.png">
+<meta property="og:image" content="http://example.com/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625191545265.png">
+<meta property="og:image" content="http://example.com/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625191824307.png">
+<meta property="og:image" content="http://example.com/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625192150450.png">
+<meta property="og:image" content="http://example.com/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625193021282.png">
+<meta property="og:image" content="http://example.com/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625193205167.png">
+<meta property="og:image" content="http://example.com/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625193232406.png">
+<meta property="og:image" content="http://example.com/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625193759930.png">
+<meta property="og:image" content="http://example.com/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625194049036.png">
+<meta property="article:published_time" content="2022-06-25T03:09:44.000Z">
+<meta property="article:modified_time" content="2022-06-25T11:55:57.370Z">
+<meta property="article:author" content="Aiden">
+<meta property="article:tag" content="插值与拟合">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625112613360.png">
+
+
+<link rel="canonical" href="http://example.com/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://example.com/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/","path":"2022/06/25/3-插值算法/","title":"3.插值算法"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>3.插值算法 | Aiden</title>
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Aiden</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E6%A6%82%E8%BF%B0"><span class="nav-text">1. 概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E4%B8%80%E7%BB%B4%E6%8F%92%E5%80%BC%E9%97%AE%E9%A2%98"><span class="nav-text">2. 一维插值问题</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%EF%BC%881%EF%BC%89%E4%B8%80%E8%88%AC%E6%8F%92%E5%80%BC%E5%A4%9A%E9%A1%B9%E5%BC%8F"><span class="nav-text">（1）一般插值多项式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%EF%BC%882%EF%BC%89%E6%8B%89%E6%A0%BC%E6%9C%97%E6%97%A5%E6%8F%92%E5%80%BC%E6%B3%95"><span class="nav-text">（2）拉格朗日插值法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%EF%BC%883%EF%BC%89%E7%89%9B%E9%A1%BF%E6%8F%92%E5%80%BC%E6%B3%95"><span class="nav-text">（3）牛顿插值法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%EF%BC%884%EF%BC%89%E5%88%86%E6%AE%B5%E7%BA%BF%E6%80%A7%E6%8F%92%E5%80%BC"><span class="nav-text">（4）分段线性插值</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%EF%BC%885%EF%BC%89%E5%88%86%E6%AE%B5%E4%BA%8C%E6%AC%A1%E6%8F%92%E5%80%BC"><span class="nav-text">（5）分段二次插值</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%EF%BC%886%EF%BC%89%E5%9F%83%E5%B0%94%E7%B1%B3%E7%89%B9-Hermite-%E6%8F%92%E5%80%BC%E5%92%8C%E5%88%86%E6%AE%B5%E4%B8%89%E6%AC%A1%E5%9F%83%E5%B0%94%E7%B1%B3%E7%89%B9%E6%8F%92%E5%80%BC"><span class="nav-text">（6）埃尔米特(Hermite)插值和分段三次埃尔米特插值</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%EF%BC%887%EF%BC%89%E4%B8%89%E6%AC%A1%E6%A0%B7%E6%9D%A1%E6%8F%92%E5%80%BC"><span class="nav-text">（7）三次样条插值</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-n%E7%BB%B4%E6%8F%92%E5%80%BC%E9%97%AE%E9%A2%98"><span class="nav-text">3. n维插值问题</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Aiden"
+      src="/images/header.jpg">
+  <p class="site-author-name" itemprop="name">Aiden</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">6</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="Aiden">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Aiden">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="3.插值算法 | Aiden">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          3.插值算法
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2022-06-25 11:09:44 / 修改时间：19:55:57" itemprop="dateCreated datePublished" datetime="2022-06-25T11:09:44+08:00">2022-06-25</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%95%B0%E6%A8%A1/" itemprop="url" rel="index"><span itemprop="name">数模</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>7 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h3 id="1-概述"><a href="#1-概述" class="headerlink" title="1. 概述"></a>1. 概述</h3><blockquote>
+<p>什么是插值算法？为什么需要插值算法？插值法分类？</p>
+</blockquote>
+<p>关于插值算法的专业定义如下：</p>
+<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625112613360.png" alt="image-20220625112613360" style="zoom: 67%;">
+
+<span id="more"></span>
+
+<ul>
+<li><p>简单来说，插值算法就是构造经过所有插值节点的函数，而与之类似的拟合并不需要经过这些点</p>
+</li>
+<li><p>当给定数据量比较少的时候，为了进行数据、模型的处理和分析，我们需要模拟产生一些新的靠谱的数据来满足数据的需求，这就是我们为什么需要进行插值（数据量比较大的时候用拟合更合适）</p>
+</li>
+<li><p>插值法主要分三类：插值多项式（构造代数多项式），分段插值，三角插值（需要用到傅里叶变换），下面仅考虑前两种插值方法</p>
+</li>
+</ul>
+<blockquote>
+<p>除了做插值来补充数据之外，插值还可以做短期数据的预测！有时效果还不错</p>
+</blockquote>
+<h3 id="2-一维插值问题"><a href="#2-一维插值问题" class="headerlink" title="2. 一维插值问题"></a>2. 一维插值问题</h3><p>一个通常遇到的问题，下面介绍解决这类插值的方法</p>
+<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625113217863.png" alt="image-20220625113217863" style="zoom: 67%;">
+
+<h4 id="（1）一般插值多项式"><a href="#（1）一般插值多项式" class="headerlink" title="（1）一般插值多项式"></a>（1）一般插值多项式</h4><img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625113552820.png" alt="image-20220625113552820" style="zoom:67%;">
+
+<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625113611867.png" alt="image-20220625113611867" style="zoom: 67%;">
+
+<h4 id="（2）拉格朗日插值法"><a href="#（2）拉格朗日插值法" class="headerlink" title="（2）拉格朗日插值法"></a>（2）拉格朗日插值法</h4><p>这种方法可以达到经过插值节点的目标，下面通过插值节点的增加阐述其思想：</p>
+<p>当插值节点数量为2时，构造下面的函数，当x&#x3D;x<del>0</del>时y0前面系数为1，y<del>1</del>前系数为0，结果为y<del>0</del>，同理当x&#x3D;x<del>1</del></p>
+<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625114506511.png" alt="image-20220625114506511" style="zoom: 50%;">
+
+<p>当插值节点数量为3时，构造下面的函数，当x&#x3D;x<del>0</del>时y0前面系数为1，y<del>1</del>前系数为0，y<del>2</del>前系数为0，结果为y<del>0</del>，其他节点同理可得</p>
+<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625114506511.png" alt="image-20220625114506511" style="zoom: 50%;">
+
+<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625115006790.png" alt="image-20220625115006790" style="zoom:50%;">
+
+<p>易知拉格朗日构造的函数结构为：对应的y<del>j</del>乘以一项，这项的分子为(x-x<del>i</del>)的乘积，分母为(x<del>j</del>-x<del>i</del>)的乘积，其中i !&#x3D;j</p>
+<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625115445016.png" alt="image-20220625115445016" style="zoom:67%;">
+
+<h4 id="（3）牛顿插值法"><a href="#（3）牛顿插值法" class="headerlink" title="（3）牛顿插值法"></a>（3）牛顿插值法</h4><img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625190328220.png" alt="image-20220625190328220" style="zoom:67%;">
+
+
+
+<blockquote>
+<p>下面对上述的拉格朗日和牛顿插值进行总结：</p>
+<ul>
+<li>与拉格朗日插值法相比，牛顿插值法的计算过程具有继承性。 （牛顿插值法每次插值只和前n项的值有关，这样每次只要在原来的函数上添加，就是说当添加一个插值节点时，拉格朗日需要重新写整个函数，而牛顿只需要添加一项</li>
+<li>都存在龙格现象：即在两端处波动极大,产生明显的震荡。故在不熟悉曲线运动趋势的前提下，不要轻易使用高次插值。</li>
+</ul>
+<p>例：对下述函数使用拉格朗日插值，观察插值得到的函数</p>
+<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625190908334.png" alt="image-20220625190908334" style="zoom:67%;">
+
+<p>下面是不同次数插值得到的效果，可以看到高次插值在两端导致震荡</p>
+<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625191036744.png" alt="image-20220625191036744" style="zoom: 67%;">
+
+<ul>
+<li>除此之外，两种插值方法仅仅要求插值多项式在插值节点处与被插函数有相等的函数值，而这种插值多项式却不能全面反映被插值函数的性态，在许多实际问题中，不仅要求插值函数与被插值函数在所有节点处有<strong>相同的函数值</strong>，它也需要在一个或全部节点上插值多项式与被插函数有<strong>相同的低阶甚至高阶的导数值</strong>，这是拉格朗日和牛顿插值法无法做到的</li>
+</ul>
+</blockquote>
+<h4 id="（4）分段线性插值"><a href="#（4）分段线性插值" class="headerlink" title="（4）分段线性插值"></a>（4）分段线性插值</h4><p>分段线性插值的思路就是相邻的两点构成一条线段，进而构成整个函数</p>
+<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625191545265.png" alt="image-20220625191545265" style="zoom:67%;">
+
+<h4 id="（5）分段二次插值"><a href="#（5）分段二次插值" class="headerlink" title="（5）分段二次插值"></a>（5）分段二次插值</h4><p>三个节点的拉格朗日+分段插值</p>
+<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625191824307.png" alt="image-20220625191824307" style="zoom: 67%;">
+
+
+
+<h4 id="（6）埃尔米特-Hermite-插值和分段三次埃尔米特插值"><a href="#（6）埃尔米特-Hermite-插值和分段三次埃尔米特插值" class="headerlink" title="（6）埃尔米特(Hermite)插值和分段三次埃尔米特插值"></a>（6）埃尔米特(Hermite)插值和分段三次埃尔米特插值</h4><p>埃尔米特插值多项式不但要求在节点上的函数值相等，而且还要求对应的导数值也相等,甚至要求高阶导数也相等，这样就解决了拉格朗日插值法和牛顿插值法的第二个缺点</p>
+<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625192150450.png" alt="image-20220625192150450" style="zoom:67%;">
+
+<p>但是直接使用Hermite插值得到的多项式次数较高，也存在着龙格现象， 因此在实际应用中，往往使用分段三次 Hermite 插值多项式 (PCHIP)。</p>
+<blockquote>
+<p>这里我们可以对原理有个大概的了解，在实现的时候matlab有函数直接调用</p>
+</blockquote>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">%%matlab内置函数pchip来做分段三次埃尔米特插值</span></span><br><span class="line"><span class="comment">%%p = pchip(x,y, new_x)</span></span><br><span class="line"><span class="comment">%%x是已知的样本点的横坐标;y是已知的样本点的纵坐标;new_x是要插入处对应的横坐标</span></span><br><span class="line">x = ‐<span class="built_in">pi</span>:<span class="built_in">pi</span>; y = <span class="built_in">sin</span>(x);</span><br><span class="line">new_x = ‐<span class="built_in">pi</span>:<span class="number">0.1</span>:<span class="built_in">pi</span>;</span><br><span class="line">p = pchip(x,y,new_x);</span><br><span class="line"><span class="built_in">plot</span>(x, y, <span class="string">&#x27;o&#x27;</span>, new_x, p, <span class="string">&#x27;r‐&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>附plot函数的一点点说明</p>
+<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625193021282.png" alt="image-20220625193021282" style="zoom: 67%;">
+</blockquote>
+<h4 id="（7）三次样条插值"><a href="#（7）三次样条插值" class="headerlink" title="（7）三次样条插值"></a>（7）三次样条插值</h4><blockquote>
+<p>比埃尔米特更加苛刻的条件构造插值函数</p>
+</blockquote>
+<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625193205167.png" alt="image-20220625193205167" style="zoom:67%;">
+
+<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625193232406.png" alt="image-20220625193232406" style="zoom:67%;">
+
+<blockquote>
+<p>这里我们可以对原理有个大概的了解，在实现的时候matlab有函数直接调用</p>
+</blockquote>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">%%p = spline (x,y, new_x) </span></span><br><span class="line"><span class="comment">%%x是已知的样本点的横坐标;y是已知的样本点的纵坐标;new_x是要插入处对应的横坐标</span></span><br><span class="line">x=-<span class="built_in">pi</span>:<span class="built_in">pi</span>;</span><br><span class="line">y=<span class="built_in">sin</span>(x);</span><br><span class="line">new_x=-<span class="built_in">pi</span>:<span class="number">0.1</span>:<span class="built_in">pi</span>;</span><br><span class="line">p1=pchip(x,y,new_x);</span><br><span class="line">p2=spline(x,y,new_x);</span><br><span class="line"><span class="built_in">plot</span>(x,y,<span class="string">&#x27;o&#x27;</span>,new_x,p1,<span class="string">&#x27;-r&#x27;</span>,new_x,p2,<span class="string">&#x27;-b&#x27;</span>);</span><br><span class="line"><span class="built_in">legend</span>(<span class="string">&quot;样本点&quot;</span>,<span class="string">&quot;Hermite插值&quot;</span>,<span class="string">&quot;三次样条插值&quot;</span>,<span class="string">&quot;location&quot;</span>,<span class="string">&quot;SouthEast&quot;</span>);</span><br><span class="line"><span class="comment">%%legend(string1,string2,string3, …)</span></span><br><span class="line"><span class="comment">%%分别将字符串1、字符串2、字符串3……标注到图中，每个字符串对应的图标为画图时的图标</span></span><br><span class="line"><span class="comment">%%‘Location’用来指定标注显示的位置</span></span><br></pre></td></tr></table></figure>
+
+<p>下面是画图的效果，可以看到三次样条插值的效果非常像sin函数了！</p>
+<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625193759930.png" alt="image-20220625193759930" style="zoom: 67%;">
+
+
+
+
+
+<h3 id="3-n维插值问题"><a href="#3-n维插值问题" class="headerlink" title="3. n维插值问题"></a>3. n维插值问题</h3><img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625194049036.png" alt="image-20220625194049036" style="zoom:67%;">
+
+
+
+
+
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%8F%92%E5%80%BC%E4%B8%8E%E6%8B%9F%E5%90%88/" rel="tag"># 插值与拟合</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2022/06/22/2-TOPSIS%E6%B3%95/" rel="prev" title="2.TOPSIS法">
+                  <i class="fa fa-chevron-left"></i> 2.TOPSIS法
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2022/06/26/4-%E6%8B%9F%E5%90%88%E7%AE%97%E6%B3%95/" rel="next" title="4.拟合算法">
+                  4.拟合算法 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Aiden</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">16k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">54 分钟</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+<!--
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+-->
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+</body>
+</html>
