@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 6.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha256-DfWjNxDkM94fVBWx1H5BMMp0Zq7luBlV8QRcSES7s+0=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"example.com","root":"/","images":"/images","scheme":"Muse","darkmode":true,"version":"8.12.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"mac"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="一、概念回归分析是数据分析中最基本和最重要的分析工具，其任务是研究自变量x与因变量y之间的相关关系，尝试解释y的形成机制，使用x去预测y">
+<meta property="og:type" content="article">
+<meta property="og:title" content="7.多元回归分析">
+<meta property="og:url" content="http://example.com/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/index.html">
+<meta property="og:site_name" content="Aiden">
+<meta property="og:description" content="一、概念回归分析是数据分析中最基本和最重要的分析工具，其任务是研究自变量x与因变量y之间的相关关系，尝试解释y的形成机制，使用x去预测y">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720190456502.png">
+<meta property="og:image" content="http://example.com/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720190719327.png">
+<meta property="og:image" content="http://example.com/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720191439199.png">
+<meta property="og:image" content="http://example.com/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720191530826.png">
+<meta property="og:image" content="http://example.com/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720192652702.png">
+<meta property="og:image" content="http://example.com/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720192837411.png">
+<meta property="og:image" content="http://example.com/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720193212096.png">
+<meta property="og:image" content="http://example.com/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720193225640.png">
+<meta property="og:image" content="http://example.com/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720193340622.png">
+<meta property="og:image" content="http://example.com/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720193446326.png">
+<meta property="og:image" content="http://example.com/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720194623354.png">
+<meta property="og:image" content="http://example.com/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720194930439.png">
+<meta property="og:image" content="http://example.com/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720195044760.png">
+<meta property="og:image" content="http://example.com/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720202016721.png">
+<meta property="og:image" content="http://example.com/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720202040564.png">
+<meta property="og:image" content="http://example.com/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720195457471.png">
+<meta property="og:image" content="http://example.com/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720195712880.png">
+<meta property="og:image" content="http://example.com/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720195957500.png">
+<meta property="og:image" content="http://example.com/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720200029997.png">
+<meta property="og:image" content="http://example.com/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720200135406.png">
+<meta property="og:image" content="http://example.com/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720195833480.png">
+<meta property="og:image" content="http://example.com/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720200242711.png">
+<meta property="og:image" content="http://example.com/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720200810680.png">
+<meta property="og:image" content="http://example.com/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720201015378.png">
+<meta property="og:image" content="http://example.com/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720201111182.png">
+<meta property="og:image" content="http://example.com/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720201313153.png">
+<meta property="og:image" content="http://example.com/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720201348995.png">
+<meta property="og:image" content="http://example.com/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720201446627.png">
+<meta property="og:image" content="http://example.com/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720201538791.png">
+<meta property="og:image" content="http://example.com/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720201722573.png">
+<meta property="og:image" content="http://example.com/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720202331213.png">
+<meta property="og:image" content="http://example.com/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720202344605.png">
+<meta property="og:image" content="http://example.com/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720202430716.png">
+<meta property="article:published_time" content="2022-07-20T10:51:04.000Z">
+<meta property="article:modified_time" content="2022-07-20T12:24:55.291Z">
+<meta property="article:author" content="Aiden">
+<meta property="article:tag" content="回归">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720190456502.png">
+
+
+<link rel="canonical" href="http://example.com/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://example.com/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/","path":"2022/07/20/7-多元回归分析/","title":"7.多元回归分析"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>7.多元回归分析 | Aiden</title>
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Aiden</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E6%A6%82%E5%BF%B5"><span class="nav-text">一、概念</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90%E7%9A%84%E4%BD%BF%E5%91%BD"><span class="nav-text">1.回归分析的使命</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E8%87%AA%E5%8F%98%E9%87%8Fx"><span class="nav-text">2.自变量x</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-%E5%9B%A0%E5%8F%98%E9%87%8Fy"><span class="nav-text">3.因变量y</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-%E6%95%B0%E6%8D%AE"><span class="nav-text">4.数据</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#6-%E7%9B%B8%E5%85%B3%E6%80%A7"><span class="nav-text">6.相关性</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E5%A4%9A%E5%85%83%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90"><span class="nav-text">二、多元线性回归分析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E2%80%9C%E7%BA%BF%E6%80%A7%E2%80%9D"><span class="nav-text">1.“线性”</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E5%9B%9E%E5%BD%92%E7%B3%BB%E6%95%B0"><span class="nav-text">2.回归系数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90"><span class="nav-text">3.回归分析</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-%E5%86%85%E7%94%9F%E6%80%A7%E9%97%AE%E9%A2%98"><span class="nav-text">4.内生性问题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-%E5%BC%82%E6%96%B9%E5%B7%AE%E9%97%AE%E9%A2%98"><span class="nav-text">5.异方差问题</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%EF%BC%881%EF%BC%89%E5%BC%82%E6%96%B9%E5%B7%AE%E5%B8%A6%E6%9D%A5%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-text">（1）异方差带来的问题</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%EF%BC%882%EF%BC%89%E5%BC%82%E6%96%B9%E5%B7%AE%E9%97%AE%E9%A2%98%E7%9A%84%E6%A3%80%E9%AA%8C"><span class="nav-text">（2）异方差问题的检验</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%EF%BC%883%EF%BC%89%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95"><span class="nav-text">（3）解决方法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%EF%BC%884%EF%BC%89OLS-%E7%A8%B3%E5%81%A5%E6%A0%87%E5%87%86%E8%AF%AF"><span class="nav-text">（4）OLS+稳健标准误</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#6-%E5%A4%9A%E9%87%8D%E5%85%B1%E7%BA%BF%E6%80%A7%E9%97%AE%E9%A2%98"><span class="nav-text">6.多重共线性问题</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%EF%BC%881%EF%BC%89%E5%AE%8C%E5%85%A8%E5%A4%9A%E9%87%8D%E5%85%B1%E7%BA%BF%E6%80%A7%E9%97%AE%E9%A2%98"><span class="nav-text">（1）完全多重共线性问题</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%EF%BC%882%EF%BC%89%E9%9D%9E%E5%AE%8C%E5%85%A8%E7%9A%84%E5%A4%9A%E9%87%8D%E5%85%B1%E7%BA%BF%E6%80%A7%E9%97%AE%E9%A2%98"><span class="nav-text">（2）非完全的多重共线性问题</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#1%EF%BC%89%E5%B8%B8%E8%A7%81%E7%97%87%E7%8A%B6"><span class="nav-text">1）常见症状</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#2%EF%BC%89%E6%A3%80%E9%AA%8C%E5%A4%9A%E9%87%8D%E5%85%B1%E7%BA%BF%E6%80%A7"><span class="nav-text">2）检验多重共线性</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#3%EF%BC%89%E5%A4%84%E7%90%86%E6%96%B9%E6%B3%95"><span class="nav-text">3）处理方法</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#4%EF%BC%89%E9%80%90%E6%AD%A5%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90"><span class="nav-text">4）逐步回归分析</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E6%95%B0%E6%8D%AE%E7%9A%84%E7%BB%9F%E8%AE%A1%E6%8F%8F%E8%BF%B0"><span class="nav-text">三、数据的统计描述</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Aiden"
+      src="/images/header.jpg">
+  <p class="site-author-name" itemprop="name">Aiden</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">7</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="Aiden">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Aiden">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="7.多元回归分析 | Aiden">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          7.多元回归分析
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2022-07-20 18:51:04 / 修改时间：20:24:55" itemprop="dateCreated datePublished" datetime="2022-07-20T18:51:04+08:00">2022-07-20</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%95%B0%E6%A8%A1/" itemprop="url" rel="index"><span itemprop="name">数模</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.4k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>8 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h3 id="一、概念"><a href="#一、概念" class="headerlink" title="一、概念"></a>一、概念</h3><p>回归分析是数据分析中最基本和最重要的分析工具，其任务是研究自变量x与因变量y之间的相关关系，尝试解释y的形成机制，使用x去预测y</p>
+<span id="more"></span>
+
+<h4 id="1-回归分析的使命"><a href="#1-回归分析的使命" class="headerlink" title="1.回归分析的使命"></a>1.回归分析的使命</h4><img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720190456502.png" alt="image-20220720190456502" style="zoom: 67%;">
+
+<p>即：识别重要变量、判断相关性方向、估计各个自变量重要性</p>
+<p>相应的基本问题如下例所示：</p>
+<p><img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720190719327.png" alt="image-20220720190719327"></p>
+<p>问题分析：</p>
+<ul>
+<li>第一问就是要求进行回归，得到回归系数和表达式</li>
+<li>第二问就是需要判断哪个变量对因变量影响最大，需要对回归系数进行标准化</li>
+</ul>
+<h4 id="2-自变量x"><a href="#2-自变量x" class="headerlink" title="2.自变量x"></a>2.自变量x</h4><blockquote>
+<p>最简单的自变量当然就是定量变量了，但是往往会有定性的变量</p>
+</blockquote>
+<p>如果自变量中有类似性别、地域这样的定性的虚拟变量时，我们需要引入虚拟变量将定性变量转换为定量变量，如对于性别而言，引入变量female，female&#x3D;1表示女性，female&#x3D;0表示男性。</p>
+<h4 id="3-因变量y"><a href="#3-因变量y" class="headerlink" title="3.因变量y"></a>3.因变量y</h4><blockquote>
+<p>实际中，因变量类型是比较多的，主要分为以下几种：</p>
+</blockquote>
+<img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720191439199.png" alt="image-20220720191439199" style="zoom: 67%;">
+
+<p>对于不同类型的因变量y，采用的回归策略也是不同的，本章主要针对连续数值类型的y所做的线性回归</p>
+<img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720191530826.png" alt="image-20220720191530826" style="zoom:67%;">
+
+<h4 id="4-数据"><a href="#4-数据" class="headerlink" title="4.数据"></a>4.数据</h4><p>题目所给数据大体分为三类：</p>
+<table>
+<thead>
+<tr>
+<th>数据类型</th>
+<th>举例</th>
+<th>解释</th>
+<th>常用建模方法</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>横截面数据</td>
+<td>全国各省份2018年GDP的数据；发放问卷所得数据；某测试所得成绩</td>
+<td>在某一时点收集的不同对象的数据，时间维度一致</td>
+<td>多元线性回归</td>
+</tr>
+<tr>
+<td>时间序列数据</td>
+<td>中国历年GDP数据；一天体温数据</td>
+<td>对同一对象在不同时间连续观察所取得的数据</td>
+<td>移动平均、指数平滑、ARIMA、GARCH、VAR、协积</td>
+</tr>
+<tr>
+<td>面板数据</td>
+<td>2008‐2018年，我国各省份GDP的数据</td>
+<td>横截面数据与时间序列数据综合起来的一种数据资源</td>
+<td>固定效应和随机效应、静态面板和动态面板</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>本章主要分析对象为横截面数据，使用建模方法为多元线性回归，注重其解释功能而不是预测功能</p>
+</blockquote>
+<h4 id="6-相关性"><a href="#6-相关性" class="headerlink" title="6.相关性"></a>6.相关性</h4><p>相关性!&#x3D;因果性，因果性这件事是比较难通过数据来分析得到的</p>
+<p>例如：统计数据表明：游泳死亡人数越高，雪糕卖得越多 （游泳死亡人数和雪糕售出量之间呈显著正相关）</p>
+<h3 id="二、多元线性回归分析"><a href="#二、多元线性回归分析" class="headerlink" title="二、多元线性回归分析"></a>二、多元线性回归分析</h3><h4 id="1-“线性”"><a href="#1-“线性”" class="headerlink" title="1.“线性”"></a>1.“线性”</h4><p>我们可以先从一元线性回归入手，所谓一元线性回归，就是之前的拟合，在拟合中我们同样提到了线性这一概念，这里的线性与拟合所说线性一致，指对参数而言是线性的。</p>
+<p>一元线性回归（拟合）：</p>
+<img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720192652702.png" alt="image-20220720192652702" style="zoom:67%;">
+
+<blockquote>
+<p>上面把y-beta-beta*xi定义为残差ui，整个式子称之为残差平方和，u这一变量在后面称之为扰动项</p>
+</blockquote>
+<p>关于线性这件事，因为是对参数线性，对于变量，我们要以整体的观点看待，这样的数据在回归前可以提前计算为一个整体</p>
+<p><img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720192837411.png" alt="image-20220720192837411"></p>
+<h4 id="2-回归系数"><a href="#2-回归系数" class="headerlink" title="2.回归系数"></a>2.回归系数</h4><blockquote>
+<p>回归系数就是 <code>因变量=f(自变量)</code>自变量前的系数</p>
+</blockquote>
+<p>通过回归得到了回归系数，我们需要对其进行解释，主要对显著的自变量前的回归系数进行解释，注意解释时“平均”二字</p>
+<img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720193212096.png" alt="image-20220720193212096" style="zoom:67%;">
+
+<img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720193225640.png" alt="image-20220720193225640" style="zoom:67%;">
+
+<p>虚拟变量的解释，以性别（自变量）对于工资（因变量）为例进行解释：</p>
+<img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720193340622.png" alt="image-20220720193340622" style="zoom:67%;">
+
+<blockquote>
+<p>为什么回归模型中加入自然对数呢？</p>
+<img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720193446326.png" alt="image-20220720193446326" style="zoom:67%;">
+</blockquote>
+<h4 id="3-回归分析"><a href="#3-回归分析" class="headerlink" title="3.回归分析"></a>3.回归分析</h4><p>使用软件stata,先导入数据，然后输入下面的命令即可</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">regress y x1 x2 ... xk,beta robust</span><br></pre></td></tr></table></figure>
+
+<p>上面的beta是为了得到标准后的回归系数，解决哪个自变量影响最大这一问题，robust是为了解决异方差的问题，大致得到下面的表，（beta和robust的额外信息在下面没体现）</p>
+<p><img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720194623354.png" alt="image-20220720194623354"></p>
+<p>1）首先看序号1的位置，P值有没有小于0.1（90%置信水平）或者0.05（95%置信水平），小于则拒绝联合显著性检验原假设，即回归模型正确，下面的R²看上去比较小的样子，对结果有什么影响吗？</p>
+<blockquote>
+<p>这里影响不大，原因如下：</p>
+<p><img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720194930439.png" alt="image-20220720194930439"></p>
+</blockquote>
+<p>在论文中使用调整后的R²，写上这句话：</p>
+<img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720195044760.png" alt="image-20220720195044760" style="zoom:67%;">
+
+<p>2）序号2的地方在使用robust之后会有另外的一列标准误，这是为了解决异方差的问题</p>
+<p>3）序号3的位置对应每个变量的显著性检验，当显著性检验结果小于0.05&#x2F;0.1时，表示在对应的置信水平下回归系数异于0，否则即使回归系数绝对值再大也无意义，在解释时我们只需解释显著的自变量前的回归系数即可</p>
+<h4 id="4-内生性问题"><a href="#4-内生性问题" class="headerlink" title="4.内生性问题"></a>4.内生性问题</h4><p>有时候我们引入了新的自变量，比如我们探讨定价（因变量）的形成，已经有了产品品质这一变量，但我们又引入了产品价格这一新的自变量，发现引入之后原来的产品品质这一变量的回归系数变化较大，造成其原因为：遗漏变量导致的内生性</p>
+<img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720202016721.png" alt="image-20220720202016721" style="zoom: 67%;">
+
+<img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720202040564.png" alt="image-20220720202040564" style="zoom:67%;">
+
+<h4 id="5-异方差问题"><a href="#5-异方差问题" class="headerlink" title="5.异方差问题"></a>5.异方差问题</h4><p>这是扰动项u要满足的条件之一：（自相关是下面的多重共线性问题）</p>
+<img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720195457471.png" alt="image-20220720195457471" style="zoom: 80%;">
+
+<h5 id="（1）异方差带来的问题"><a href="#（1）异方差带来的问题" class="headerlink" title="（1）异方差带来的问题"></a>（1）异方差带来的问题</h5><img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720195712880.png" alt="image-20220720195712880" style="zoom:67%;">
+
+<h5 id="（2）异方差问题的检验"><a href="#（2）异方差问题的检验" class="headerlink" title="（2）异方差问题的检验"></a>（2）异方差问题的检验</h5><p>方法一：BP检验</p>
+<img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720195957500.png" alt="image-20220720195957500" style="zoom:67%;">
+
+<p>BP检验结果：</p>
+<p><img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720200029997.png" alt="image-20220720200029997"></p>
+<p>方法二：怀特检验：</p>
+<img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720200135406.png" alt="image-20220720200135406" style="zoom:80%;">
+
+<h5 id="（3）解决方法"><a href="#（3）解决方法" class="headerlink" title="（3）解决方法"></a>（3）解决方法</h5><img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720195833480.png" alt="image-20220720195833480" style="zoom:67%;">
+
+<p>在论文中加上一句 Stock and Watson (2011)推荐，在大多数情况下应该使用“OLS + 稳健标准误”，然后用第一种方法即可</p>
+<blockquote>
+<p>我的意见是，直接用OLS+稳健的标准误</p>
+</blockquote>
+<h5 id="（4）OLS-稳健标准误"><a href="#（4）OLS-稳健标准误" class="headerlink" title="（4）OLS+稳健标准误"></a>（4）OLS+稳健标准误</h5><p>这样就会多一列，这列就是稳健的标准误，这样得出的相关系数对于的显著性检验才是合理的</p>
+<img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720200242711.png" alt="image-20220720200242711" style="zoom:50%;">
+
+<h4 id="6-多重共线性问题"><a href="#6-多重共线性问题" class="headerlink" title="6.多重共线性问题"></a>6.多重共线性问题</h4><h5 id="（1）完全多重共线性问题"><a href="#（1）完全多重共线性问题" class="headerlink" title="（1）完全多重共线性问题"></a>（1）完全多重共线性问题</h5><p>这里涉及到多分类虚拟变量的设置，对于多分类虚拟变量的设置，比如说要用虚拟变量表示各个省份，这里使用类似于单热点编码的方法进行，但是需要剔除一个变量作为对照组，否则将带来完全多重共线性问题。比如：性别时只用了female而没有用两个变量</p>
+<blockquote>
+<p>对于多分类虚拟变量的产生：（加上gen(A)即可）</p>
+<img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720200810680.png" alt="image-20220720200810680" style="zoom:67%;">
+</blockquote>
+<p>（对于普通的回归来说，stata会自动剔除一个，所以你也不用自己来了）</p>
+<h5 id="（2）非完全的多重共线性问题"><a href="#（2）非完全的多重共线性问题" class="headerlink" title="（2）非完全的多重共线性问题"></a>（2）非完全的多重共线性问题</h5><h6 id="1）常见症状"><a href="#1）常见症状" class="headerlink" title="1）常见症状"></a>1）常见症状</h6><img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720201015378.png" alt="image-20220720201015378" style="zoom:67%;">
+
+<p>比如说这道题，探究单产和一堆费用之间的关系，就体现出这样的症状了</p>
+<img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720201111182.png" alt="image-20220720201111182" style="zoom: 67%;">
+
+<h6 id="2）检验多重共线性"><a href="#2）检验多重共线性" class="headerlink" title="2）检验多重共线性"></a>2）检验多重共线性</h6><img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720201313153.png" alt="image-20220720201313153" style="zoom:67%;">
+
+<h6 id="3）处理方法"><a href="#3）处理方法" class="headerlink" title="3）处理方法"></a>3）处理方法</h6><img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720201348995.png" alt="image-20220720201348995" style="zoom: 67%;">
+
+<p>虽然但是，我们一般会剔除那些VIF较大的变量，或者用逐步回归分析</p>
+<h6 id="4）逐步回归分析"><a href="#4）逐步回归分析" class="headerlink" title="4）逐步回归分析"></a>4）逐步回归分析</h6><img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720201446627.png" alt="image-20220720201446627" style="zoom:67%;">
+
+<p>推荐用向后逐步回归分析</p>
+<p>实现：注意下面的#1和#2是显著水平，一般0.05</p>
+<img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720201538791.png" alt="image-20220720201538791" style="zoom:67%;">
+
+<p>同时在使用的过程中，<strong>逐步回归分析不会自己剔除造成完全多重共线性问题的虚拟变量，需要自己剔除（看看普通的咋剔除的）</strong></p>
+<img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720201722573.png" alt="image-20220720201722573" style="zoom: 67%;">
+
+<h3 id="三、数据的统计描述"><a href="#三、数据的统计描述" class="headerlink" title="三、数据的统计描述"></a>三、数据的统计描述</h3><p>对于提供数据的题目，最好做个统计描述，用excel、matlab、stata都行</p>
+<ul>
+<li><p>excel:数据-数据分析-描述统计</p>
+</li>
+<li><p>stata如下:</p>
+<img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720202331213.png" alt="image-20220720202331213" style="zoom:50%;">
+
+<img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720202344605.png" alt="image-20220720202344605" style="zoom:50%;">
+
+<p>对于回归而言，再列个下面的表：</p>
+<p><img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720202430716.png" alt="image-20220720202430716"></p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%9B%9E%E5%BD%92/" rel="tag"># 回归</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2022/07/17/6-%E5%85%B8%E5%9E%8B%E7%9B%B8%E5%85%B3%E5%88%86%E6%9E%90/" rel="prev" title="6.典型相关分析">
+                  <i class="fa fa-chevron-left"></i> 6.典型相关分析
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Aiden</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">19k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">1:02</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+<!--
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+-->
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+</body>
+</html>

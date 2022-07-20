@@ -1,6 +1,225 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>2.TOPSIS法</title>
+    <url>/2022/06/22/2-TOPSIS%E6%B3%95/</url>
+    <content><![CDATA[<h3 id="1-模型简介"><a href="#1-模型简介" class="headerlink" title="1. 模型简介"></a>1. 模型简介</h3><p><strong>TOPSIS 法</strong>（Technique for Order Preference by Similarity to an Ideal Solution，可翻译为逼近理想解排序法，国内常简称为<strong>优劣解距离法</strong>）是一种常用的综合评价方法，能充分利用原始数据的信息，其结果能精确地反映各评价方案之间的差距。</p>
+<span id="more"></span>
+
+<p>基本过程为先将原始数据矩阵统一指标类型（一般正向化处理） 得到正向化的矩阵，再对正向化的矩阵进行标准化处理以消除各指标量纲的影响，并找到有限方案中的最优方案和最劣方案，然后分 别计算各评价对象与最优方案和最劣方案间的距离，获得各评价对 象与最优方案的相对接近程度，以此作为评价优劣的依据。该方法 对数据分布及样本含量没有严格限制，数据计算简单易行。</p>
+<h3 id="2-模型思路"><a href="#2-模型思路" class="headerlink" title="2. 模型思路"></a>2. 模型思路</h3><blockquote>
+<p>首先之前谈到了层次分析法的不足，大概有两点：</p>
+<ul>
+<li>如果判断矩阵的size比较大，大于15，则判断矩阵和一致矩阵差异可能会很大，而且RI表格将没有对应的n</li>
+<li>如果决策层的指标的数据是已知的，如何利用数据使评价更加准确</li>
+</ul>
+</blockquote>
+<p>既然有了数据，一个比较自然的想法是根据数据来排个序，这样就能找到最优的方案了，事实上TOPSIS也是这样想的，首先来看一个例子吧，下面是一些已有的数据</p>
+<img src="/2022/06/22/2-TOPSIS%E6%B3%95/image-20220622232336080.png" alt="image-20220622232336080" style="zoom:50%;">
+
+<!--注：含氧量越高越好；PH值越接近7越好；细菌总数越少越好；植物性营养物量介于10‐20之间最佳，超 过20或低于10均不好。-->
+
+<p>我们常常说的排序要么从小到要么是从大到小，这里我们从大到小排，即第一名权重最大，上述表格的一个问题是，我们期待的数值的评价标准往往不是越大越好（例如PH并不是越大越好，而是越靠近7越好）所以我们不能简单地将数值作为排序的依据，而必须要将这些数值转换为一些数（例如PH以和7作差的绝对值来代替？），这些数使得对于满足我们的期待的数，其值越大，反之越小</p>
+<h4 id="（1）统一指标类型（正向化）"><a href="#（1）统一指标类型（正向化）" class="headerlink" title="（1）统一指标类型（正向化）"></a>（1）统一指标类型（正向化）</h4><p>在上文中我们介绍了为什么要进行指标的统一，这是因为我们需要排序，总结指标的类型，大体分为四类</p>
+<img src="/2022/06/22/2-TOPSIS%E6%B3%95/image-20220622233238046.png" alt="image-20220622233238046" style="zoom:67%;">
+
+<p>为了方便排序，我们<strong>统一转换为极大型指标</strong>，即越好的值统一之后越大，下面介绍如何对指标进行统一（或者说正向化）</p>
+<h5 id="1）极小型指标"><a href="#1）极小型指标" class="headerlink" title="1）极小型指标"></a>1）极小型指标</h5><p>极小型指标的特点是越小越好，所以要使得越小的值在统一之后越大</p>
+<ul>
+<li><p>一种易得的想法是用最大值减去该值，即<code>max-x</code></p>
+</li>
+<li><p>如果这一指标下所有值均为正数，也可以用倒数，即<code>1/x</code></p>
+</li>
+</ul>
+<h5 id="2）中间型指标"><a href="#2）中间型指标" class="headerlink" title="2）中间型指标"></a>2）中间型指标</h5><p>中间型指标的特点是越接近某个值越好，这时候你就想起绝对值了！但这样只猜对了一半，事实上我们刻画了程度这一概念</p>
+<img src="/2022/06/22/2-TOPSIS%E6%B3%95/image-20220622233904210.png" alt="image-20220622233904210" style="zoom:80%;">
+
+<p>M是距离X<em>best</em>最远的距离，用X<em>i</em>与X<em>best</em>的距离与之相除，刻画了X<em>i</em>和X<em>best</em>之间的偏移程度，越是偏离，结果越靠近1，为了正向化，我们希望越是偏离结果越小，所以用1减去了这个值</p>
+<blockquote>
+<p> 注意：正向化的公式不唯一，大家也可以结合自己的数据进行适当的修改</p>
+</blockquote>
+<h5 id="3）区间型指标"><a href="#3）区间型指标" class="headerlink" title="3）区间型指标"></a>3）区间型指标</h5><p>和中间型其实有点像，就是稍微细致考虑了符号的影响</p>
+<img src="/2022/06/22/2-TOPSIS%E6%B3%95/image-20220622234742933.png" alt="image-20220622234742933" style="zoom:80%;">
+
+
+
+<h4 id="（2）标准化"><a href="#（2）标准化" class="headerlink" title="（2）标准化"></a>（2）标准化</h4><p>通过正向化，矩阵评价指标都变成极大型指标了，但是不同的正向化以及指标本身的特点将导致指标的量纲不统一，为了去除量纲的影响，我们需要进行标准化</p>
+<blockquote>
+<p>标准化的方法有很多种，其主要目的就是去除量纲的影响，未来我们还可能见到更多 种的标准化方法，例如：(x‐x的均值)&#x2F;x的标准差；具体选用哪一种标准化的方法在多数情况下 并没有很大的限制，这里我们采用的是前人的论文中用的比较多的一种标准化方法</p>
+</blockquote>
+<p>这里我们使用的是如下标准化方法</p>
+<img src="/2022/06/22/2-TOPSIS%E6%B3%95/image-20220623100308974.png" alt="image-20220623100308974" style="zoom:67%;">
+
+
+
+<h4 id="（3）计算得分"><a href="#（3）计算得分" class="headerlink" title="（3）计算得分"></a>（3）计算得分</h4><p>怎样得到所谓的得分呢？一种想法就是直接用排名来作为得分，但是如果这样话，我们就可以随便地修改元素值，只需要保持排名不变，最终的评分就不会变，这种做法的不合理之处在于太过粗糙，这样得出的评分虽然有相关性，但是相关性不强（我们刚刚上面两步做出的数据都没有用了！），下面介绍当只有一个指标时采用的方法：</p>
+<p>构造评分函数：<code>(x-max)/(max-min)</code></p>
+<blockquote>
+<p>这里不建议使用数据可能的最大值和最小值作为max和min，主要原因是有很多指标不存在理论的最大值和最小值</p>
+</blockquote>
+<p>下面我们考虑多个指标的情况，我们可以通过上述单一指标的情况进行推广</p>
+<img src="/2022/06/22/2-TOPSIS%E6%B3%95/image-20220623102311447.png" alt="image-20220623102311447" style="zoom:67%;">
+
+<p>我们继续沿用距离这一解释，在下面使用欧氏距离来推广这一计算评分的公式</p>
+<img src="/2022/06/22/2-TOPSIS%E6%B3%95/image-20220623102435631.png" alt="image-20220623102435631" style="zoom: 80%;">
+
+<p>这里的最大值就是取每个指标的最大元素，拼凑成一个点，最小值就是取每个指标的最小元素，拼凑成一个点，然后分别计算要评价的对象与两点的距离<code>D+</code>和<code>D-</code>，最终计算得分为：<code>S=D-/(D+ + D-)</code></p>
+<h4 id="（4）将得分归一化"><a href="#（4）将得分归一化" class="headerlink" title="（4）将得分归一化"></a>（4）将得分归一化</h4><p>简单地对每个计算出来的得分进行归一化</p>
+<p><img src="/2022/06/22/2-TOPSIS%E6%B3%95/image-20220623103016809.png" alt="image-20220623103016809"></p>
+<h3 id="3-代码实现"><a href="#3-代码实现" class="headerlink" title="3. 代码实现"></a>3. 代码实现</h3><h4 id="1-主函数"><a href="#1-主函数" class="headerlink" title="1.主函数"></a>1.主函数</h4><figure class="highlight matlab"><table><tr><td class="code"><pre><span class="line"><span class="comment">%%  第一步，加载数据</span></span><br><span class="line">clear;clc</span><br><span class="line">load data_water_quality.mat</span><br><span class="line"><span class="comment">%%  第二步：判断是否需要正向化</span></span><br><span class="line">[n,m] = <span class="built_in">size</span>(X);</span><br><span class="line"><span class="built_in">disp</span>([<span class="string">&#x27;共有&#x27;</span> num2str(n) <span class="string">&#x27;个评价对象, &#x27;</span> num2str(m) <span class="string">&#x27;个评价指标&#x27;</span>]) </span><br><span class="line">Judge = input([<span class="string">&#x27;这&#x27;</span> num2str(m) <span class="string">&#x27;个指标是否需要经过正向化处理，需要请输入1 ，不需要输入0：  &#x27;</span>]);</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> Judge == <span class="number">1</span></span><br><span class="line">    Position = input(<span class="string">&#x27;请输入需要正向化处理的指标所在的列，例如第2、3、6三列需要处理，那么你需要输入[2,3,6]： &#x27;</span>); <span class="comment">%[2,3,4]</span></span><br><span class="line">    <span class="built_in">disp</span>(<span class="string">&#x27;请输入需要处理的这些列的指标类型（1：极小型， 2：中间型， 3：区间型） &#x27;</span>)</span><br><span class="line">    Type = input(<span class="string">&#x27;例如：第2列是极小型，第3列是区间型，第6列是中间型，就输入[1,3,2]：  &#x27;</span>); <span class="comment">%[2,1,3]</span></span><br><span class="line">    <span class="comment">% 注意，Position和Type是两个同维度的行向量</span></span><br><span class="line">    <span class="keyword">for</span> <span class="built_in">i</span> = <span class="number">1</span> : <span class="built_in">size</span>(Position,<span class="number">2</span>)  <span class="comment">%这里需要对这些列分别处理，因此我们需要知道一共要处理的次数，即循环的次数</span></span><br><span class="line">        X(:,Position(<span class="built_in">i</span>)) = Positivization(X(:,Position(<span class="built_in">i</span>)),Type(<span class="built_in">i</span>),Position(<span class="built_in">i</span>));</span><br><span class="line">    <span class="comment">% Positivization是我们自己定义的函数，其作用是进行正向化，其一共接收三个参数</span></span><br><span class="line">    <span class="comment">% 第一个参数是要正向化处理的那一列向量 X(:,Position(i))   回顾上一讲的知识，X(:,n)表示取第n列的全部元素</span></span><br><span class="line">    <span class="comment">% 第二个参数是对应的这一列的指标类型（1：极小型， 2：中间型， 3：区间型）</span></span><br><span class="line">    <span class="comment">% 第三个参数是告诉函数我们正在处理的是原始矩阵中的哪一列</span></span><br><span class="line">    <span class="comment">% 该函数有一个返回值，它返回正向化之后的指标，我们可以将其直接赋值给我们原始要处理的那一列向量</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line">    <span class="built_in">disp</span>(<span class="string">&#x27;正向化后的矩阵 X =  &#x27;</span>)</span><br><span class="line">    <span class="built_in">disp</span>(X)</span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line"><span class="comment">%% 第三步：对正向化后的矩阵进行标准化</span></span><br><span class="line">Z = X ./ <span class="built_in">repmat</span>(sum(X.*X) .^ <span class="number">0.5</span>, n, <span class="number">1</span>);</span><br><span class="line"><span class="built_in">disp</span>(<span class="string">&#x27;标准化矩阵 Z = &#x27;</span>)</span><br><span class="line"><span class="built_in">disp</span>(Z)</span><br><span class="line"></span><br><span class="line"><span class="comment">%% 第四步：计算与最大值的距离和最小值的距离，并算出得分</span></span><br><span class="line">D_P = sum([(Z - <span class="built_in">repmat</span>(<span class="built_in">max</span>(Z),n,<span class="number">1</span>)) .^ <span class="number">2</span> ],<span class="number">2</span>) .^ <span class="number">0.5</span>;   <span class="comment">% D+ 与最大值的距离向量</span></span><br><span class="line">D_N = sum([(Z - <span class="built_in">repmat</span>(<span class="built_in">min</span>(Z),n,<span class="number">1</span>)) .^ <span class="number">2</span> ],<span class="number">2</span>) .^ <span class="number">0.5</span>;   <span class="comment">% D- 与最小值的距离向量</span></span><br><span class="line">S = D_N ./ (D_P+D_N);    <span class="comment">% 未归一化的得分</span></span><br><span class="line"><span class="built_in">disp</span>(<span class="string">&#x27;最后的得分为：&#x27;</span>)</span><br><span class="line">stand_S = S / sum(S)</span><br><span class="line">[sorted_S,index] = <span class="built_in">sort</span>(stand_S ,<span class="string">&#x27;descend&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="2-Positivization函数"><a href="#2-Positivization函数" class="headerlink" title="2.Positivization函数"></a>2.Positivization函数</h4><figure class="highlight matlab"><table><tr><td class="code"><pre><span class="line"><span class="comment">% function [输出变量] = 函数名称(输入变量）  </span></span><br><span class="line"><span class="comment">% 函数的中间部分都是函数体</span></span><br><span class="line"><span class="comment">% 函数的最后要用end结尾</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="params">[posit_x]</span> = <span class="title">Positivization</span><span class="params">(x,type,i)</span></span></span><br><span class="line"><span class="comment">% 输入变量有三个：</span></span><br><span class="line"><span class="comment">% x：需要正向化处理的指标对应的原始列向量</span></span><br><span class="line"><span class="comment">% type： 指标的类型（1：极小型， 2：中间型， 3：区间型）</span></span><br><span class="line"><span class="comment">% i: 正在处理的是原始矩阵中的哪一列</span></span><br><span class="line"><span class="comment">% 输出变量posit_x表示：正向化后的列向量</span></span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">type</span> == <span class="number">1</span>  <span class="comment">%极小型</span></span><br><span class="line">        <span class="built_in">disp</span>([<span class="string">&#x27;第&#x27;</span> num2str(<span class="built_in">i</span>) <span class="string">&#x27;列是极小型，正在正向化&#x27;</span>] )</span><br><span class="line">        posit_x = Min2Max(x);  <span class="comment">%调用Min2Max函数来正向化</span></span><br><span class="line">        <span class="built_in">disp</span>([<span class="string">&#x27;第&#x27;</span> num2str(<span class="built_in">i</span>) <span class="string">&#x27;列极小型正向化处理完成&#x27;</span>] )</span><br><span class="line">        <span class="built_in">disp</span>(<span class="string">&#x27;~~~~~~~~~~~~~~~~~~~~分界线~~~~~~~~~~~~~~~~~~~~&#x27;</span>)</span><br><span class="line">    <span class="keyword">elseif</span> <span class="built_in">type</span> == <span class="number">2</span>  <span class="comment">%中间型</span></span><br><span class="line">        <span class="built_in">disp</span>([<span class="string">&#x27;第&#x27;</span> num2str(<span class="built_in">i</span>) <span class="string">&#x27;列是中间型&#x27;</span>] )</span><br><span class="line">        best = input(<span class="string">&#x27;请输入最佳的那一个值： &#x27;</span>);</span><br><span class="line">        posit_x = Mid2Max(x,best);</span><br><span class="line">        <span class="built_in">disp</span>([<span class="string">&#x27;第&#x27;</span> num2str(<span class="built_in">i</span>) <span class="string">&#x27;列中间型正向化处理完成&#x27;</span>] )</span><br><span class="line">        <span class="built_in">disp</span>(<span class="string">&#x27;~~~~~~~~~~~~~~~~~~~~分界线~~~~~~~~~~~~~~~~~~~~&#x27;</span>)</span><br><span class="line">    <span class="keyword">elseif</span> <span class="built_in">type</span> == <span class="number">3</span>  <span class="comment">%区间型</span></span><br><span class="line">        <span class="built_in">disp</span>([<span class="string">&#x27;第&#x27;</span> num2str(<span class="built_in">i</span>) <span class="string">&#x27;列是区间型&#x27;</span>] )</span><br><span class="line">        a = input(<span class="string">&#x27;请输入区间的下界： &#x27;</span>);</span><br><span class="line">        b = input(<span class="string">&#x27;请输入区间的上界： &#x27;</span>); </span><br><span class="line">        posit_x = Inter2Max(x,a,b);</span><br><span class="line">        <span class="built_in">disp</span>([<span class="string">&#x27;第&#x27;</span> num2str(<span class="built_in">i</span>) <span class="string">&#x27;列区间型正向化处理完成&#x27;</span>] )</span><br><span class="line">        <span class="built_in">disp</span>(<span class="string">&#x27;~~~~~~~~~~~~~~~~~~~~分界线~~~~~~~~~~~~~~~~~~~~&#x27;</span>)</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        <span class="built_in">disp</span>(<span class="string">&#x27;没有这种类型的指标，请检查Type向量中是否有除了1、2、3之外的其他值&#x27;</span>)</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="3-Min2Max函数"><a href="#3-Min2Max函数" class="headerlink" title="3.Min2Max函数"></a>3.Min2Max函数</h4><figure class="highlight matlab"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="params">[posit_x]</span> = <span class="title">Min2Max</span><span class="params">(x)</span></span></span><br><span class="line">    posit_x = <span class="built_in">max</span>(x) - x;</span><br><span class="line">     <span class="comment">%posit_x = 1 ./ x;    %如果x全部都大于0，也可以这样正向化</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="4-Mid2Max函数"><a href="#4-Mid2Max函数" class="headerlink" title="4.Mid2Max函数"></a>4.Mid2Max函数</h4><figure class="highlight matlab"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="params">[posit_x]</span> = <span class="title">Mid2Max</span><span class="params">(x,best)</span></span></span><br><span class="line">    M = <span class="built_in">max</span>(<span class="built_in">abs</span>(x-best));</span><br><span class="line">    posit_x = <span class="number">1</span> - <span class="built_in">abs</span>(x-best) / M;</span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="5-Inter2Max函数"><a href="#5-Inter2Max函数" class="headerlink" title="5.Inter2Max函数"></a>5.Inter2Max函数</h4><figure class="highlight matlab"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="params">[posit_x]</span> = <span class="title">Inter2Max</span><span class="params">(x,a,b)</span></span></span><br><span class="line">    r_x = <span class="built_in">size</span>(x,<span class="number">1</span>);  <span class="comment">% row of x </span></span><br><span class="line">    M = <span class="built_in">max</span>([a-<span class="built_in">min</span>(x),<span class="built_in">max</span>(x)-b]);</span><br><span class="line">    posit_x = <span class="built_in">zeros</span>(r_x,<span class="number">1</span>);   <span class="comment">%zeros函数用法: zeros(3)  zeros(3,1)  ones(3)</span></span><br><span class="line">    <span class="comment">% 初始化posit_x全为0  初始化的目的是节省处理时间</span></span><br><span class="line">    <span class="keyword">for</span> <span class="built_in">i</span> = <span class="number">1</span>: r_x</span><br><span class="line">        <span class="keyword">if</span> x(<span class="built_in">i</span>) &lt; a</span><br><span class="line">           posit_x(<span class="built_in">i</span>) = <span class="number">1</span>-(a-x(<span class="built_in">i</span>))/M;</span><br><span class="line">        <span class="keyword">elseif</span> x(<span class="built_in">i</span>) &gt; b</span><br><span class="line">           posit_x(<span class="built_in">i</span>) = <span class="number">1</span>-(x(<span class="built_in">i</span>)-b)/M;</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">           posit_x(<span class="built_in">i</span>) = <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="4-模型拓展"><a href="#4-模型拓展" class="headerlink" title="4. 模型拓展"></a>4. 模型拓展</h3><p>在上面的介绍中，我们认为每个指标同等重要，即他们的权重都是1，但很多情况下指标之间重要性不同，因此我们给予不同权重。（在最后一步计算得分时）</p>
+<img src="/2022/06/22/2-TOPSIS%E6%B3%95/image-20220624143826537.png" alt="image-20220624143826537" style="zoom: 80%;">
+
+
+
+<p>权重的确定可以通过1.1中的层次分析法确定，但是层次分析法还是太主观了</p>
+<img src="/2022/06/22/2-TOPSIS%E6%B3%95/image-20220624144008452.png" alt="image-20220624144008452" style="zoom:80%;">
+
+
+
+]]></content>
+      <categories>
+        <category>数模</category>
+      </categories>
+      <tags>
+        <tag>评价类问题</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>3.插值算法</title>
+    <url>/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/</url>
+    <content><![CDATA[<h3 id="1-概述"><a href="#1-概述" class="headerlink" title="1. 概述"></a>1. 概述</h3><blockquote>
+<p>什么是插值算法？为什么需要插值算法？插值法分类？</p>
+</blockquote>
+<p>关于插值算法的专业定义如下：</p>
+<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625112613360.png" alt="image-20220625112613360" style="zoom: 67%;">
+
+<span id="more"></span>
+
+<ul>
+<li><p>简单来说，插值算法就是构造经过所有插值节点的函数，而与之类似的拟合并不需要经过这些点</p>
+</li>
+<li><p>当给定数据量比较少的时候，为了进行数据、模型的处理和分析，我们需要模拟产生一些新的靠谱的数据来满足数据的需求，这就是我们为什么需要进行插值（数据量比较大的时候用拟合更合适）</p>
+</li>
+<li><p>插值法主要分三类：插值多项式（构造代数多项式），分段插值，三角插值（需要用到傅里叶变换），下面仅考虑前两种插值方法</p>
+</li>
+</ul>
+<blockquote>
+<p>除了做插值来补充数据之外，插值还可以做短期数据的预测！有时效果还不错</p>
+</blockquote>
+<h3 id="2-一维插值问题"><a href="#2-一维插值问题" class="headerlink" title="2. 一维插值问题"></a>2. 一维插值问题</h3><p>一个通常遇到的问题，下面介绍解决这类插值的方法</p>
+<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625113217863.png" alt="image-20220625113217863" style="zoom: 67%;">
+
+<h4 id="（1）一般插值多项式"><a href="#（1）一般插值多项式" class="headerlink" title="（1）一般插值多项式"></a>（1）一般插值多项式</h4><img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625113552820.png" alt="image-20220625113552820" style="zoom:67%;">
+
+<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625113611867.png" alt="image-20220625113611867" style="zoom: 67%;">
+
+<h4 id="（2）拉格朗日插值法"><a href="#（2）拉格朗日插值法" class="headerlink" title="（2）拉格朗日插值法"></a>（2）拉格朗日插值法</h4><p>这种方法可以达到经过插值节点的目标，下面通过插值节点的增加阐述其思想：</p>
+<p>当插值节点数量为2时，构造下面的函数，当x&#x3D;x<del>0</del>时y0前面系数为1，y<del>1</del>前系数为0，结果为y<del>0</del>，同理当x&#x3D;x<del>1</del></p>
+<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625114506511.png" alt="image-20220625114506511" style="zoom: 50%;">
+
+<p>当插值节点数量为3时，构造下面的函数，当x&#x3D;x<del>0</del>时y0前面系数为1，y<del>1</del>前系数为0，y<del>2</del>前系数为0，结果为y<del>0</del>，其他节点同理可得</p>
+<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625114506511.png" alt="image-20220625114506511" style="zoom: 50%;">
+
+<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625115006790.png" alt="image-20220625115006790" style="zoom:50%;">
+
+<p>易知拉格朗日构造的函数结构为：对应的y<del>j</del>乘以一项，这项的分子为(x-x<del>i</del>)的乘积，分母为(x<del>j</del>-x<del>i</del>)的乘积，其中i !&#x3D;j</p>
+<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625115445016.png" alt="image-20220625115445016" style="zoom:67%;">
+
+<h4 id="（3）牛顿插值法"><a href="#（3）牛顿插值法" class="headerlink" title="（3）牛顿插值法"></a>（3）牛顿插值法</h4><img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625190328220.png" alt="image-20220625190328220" style="zoom:67%;">
+
+
+
+<blockquote>
+<p>下面对上述的拉格朗日和牛顿插值进行总结：</p>
+<ul>
+<li>与拉格朗日插值法相比，牛顿插值法的计算过程具有继承性。 （牛顿插值法每次插值只和前n项的值有关，这样每次只要在原来的函数上添加，就是说当添加一个插值节点时，拉格朗日需要重新写整个函数，而牛顿只需要添加一项</li>
+<li>都存在龙格现象：即在两端处波动极大,产生明显的震荡。故在不熟悉曲线运动趋势的前提下，不要轻易使用高次插值。</li>
+</ul>
+<p>例：对下述函数使用拉格朗日插值，观察插值得到的函数</p>
+<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625190908334.png" alt="image-20220625190908334" style="zoom:67%;">
+
+<p>下面是不同次数插值得到的效果，可以看到高次插值在两端导致震荡</p>
+<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625191036744.png" alt="image-20220625191036744" style="zoom: 67%;">
+
+<ul>
+<li>除此之外，两种插值方法仅仅要求插值多项式在插值节点处与被插函数有相等的函数值，而这种插值多项式却不能全面反映被插值函数的性态，在许多实际问题中，不仅要求插值函数与被插值函数在所有节点处有<strong>相同的函数值</strong>，它也需要在一个或全部节点上插值多项式与被插函数有<strong>相同的低阶甚至高阶的导数值</strong>，这是拉格朗日和牛顿插值法无法做到的</li>
+</ul>
+</blockquote>
+<h4 id="（4）分段线性插值"><a href="#（4）分段线性插值" class="headerlink" title="（4）分段线性插值"></a>（4）分段线性插值</h4><p>分段线性插值的思路就是相邻的两点构成一条线段，进而构成整个函数</p>
+<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625191545265.png" alt="image-20220625191545265" style="zoom:67%;">
+
+<h4 id="（5）分段二次插值"><a href="#（5）分段二次插值" class="headerlink" title="（5）分段二次插值"></a>（5）分段二次插值</h4><p>三个节点的拉格朗日+分段插值</p>
+<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625191824307.png" alt="image-20220625191824307" style="zoom: 67%;">
+
+
+
+<h4 id="（6）埃尔米特-Hermite-插值和分段三次埃尔米特插值"><a href="#（6）埃尔米特-Hermite-插值和分段三次埃尔米特插值" class="headerlink" title="（6）埃尔米特(Hermite)插值和分段三次埃尔米特插值"></a>（6）埃尔米特(Hermite)插值和分段三次埃尔米特插值</h4><p>埃尔米特插值多项式不但要求在节点上的函数值相等，而且还要求对应的导数值也相等,甚至要求高阶导数也相等，这样就解决了拉格朗日插值法和牛顿插值法的第二个缺点</p>
+<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625192150450.png" alt="image-20220625192150450" style="zoom:67%;">
+
+<p>但是直接使用Hermite插值得到的多项式次数较高，也存在着龙格现象， 因此在实际应用中，往往使用分段三次 Hermite 插值多项式 (PCHIP)。</p>
+<blockquote>
+<p>这里我们可以对原理有个大概的了解，在实现的时候matlab有函数直接调用</p>
+</blockquote>
+<figure class="highlight matlab"><table><tr><td class="code"><pre><span class="line"><span class="comment">%%matlab内置函数pchip来做分段三次埃尔米特插值</span></span><br><span class="line"><span class="comment">%%p = pchip(x,y, new_x)</span></span><br><span class="line"><span class="comment">%%x是已知的样本点的横坐标;y是已知的样本点的纵坐标;new_x是要插入处对应的横坐标</span></span><br><span class="line">x = ‐<span class="built_in">pi</span>:<span class="built_in">pi</span>; y = <span class="built_in">sin</span>(x);</span><br><span class="line">new_x = ‐<span class="built_in">pi</span>:<span class="number">0.1</span>:<span class="built_in">pi</span>;</span><br><span class="line">p = pchip(x,y,new_x);</span><br><span class="line"><span class="built_in">plot</span>(x, y, <span class="string">&#x27;o&#x27;</span>, new_x, p, <span class="string">&#x27;r‐&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>附plot函数的一点点说明</p>
+<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625193021282.png" alt="image-20220625193021282" style="zoom: 67%;">
+</blockquote>
+<h4 id="（7）三次样条插值"><a href="#（7）三次样条插值" class="headerlink" title="（7）三次样条插值"></a>（7）三次样条插值</h4><blockquote>
+<p>比埃尔米特更加苛刻的条件构造插值函数</p>
+</blockquote>
+<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625193205167.png" alt="image-20220625193205167" style="zoom:67%;">
+
+<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625193232406.png" alt="image-20220625193232406" style="zoom:67%;">
+
+<blockquote>
+<p>这里我们可以对原理有个大概的了解，在实现的时候matlab有函数直接调用</p>
+</blockquote>
+<figure class="highlight matlab"><table><tr><td class="code"><pre><span class="line"><span class="comment">%%p = spline (x,y, new_x) </span></span><br><span class="line"><span class="comment">%%x是已知的样本点的横坐标;y是已知的样本点的纵坐标;new_x是要插入处对应的横坐标</span></span><br><span class="line">x=-<span class="built_in">pi</span>:<span class="built_in">pi</span>;</span><br><span class="line">y=<span class="built_in">sin</span>(x);</span><br><span class="line">new_x=-<span class="built_in">pi</span>:<span class="number">0.1</span>:<span class="built_in">pi</span>;</span><br><span class="line">p1=pchip(x,y,new_x);</span><br><span class="line">p2=spline(x,y,new_x);</span><br><span class="line"><span class="built_in">plot</span>(x,y,<span class="string">&#x27;o&#x27;</span>,new_x,p1,<span class="string">&#x27;-r&#x27;</span>,new_x,p2,<span class="string">&#x27;-b&#x27;</span>);</span><br><span class="line"><span class="built_in">legend</span>(<span class="string">&quot;样本点&quot;</span>,<span class="string">&quot;Hermite插值&quot;</span>,<span class="string">&quot;三次样条插值&quot;</span>,<span class="string">&quot;location&quot;</span>,<span class="string">&quot;SouthEast&quot;</span>);</span><br><span class="line"><span class="comment">%%legend(string1,string2,string3, …)</span></span><br><span class="line"><span class="comment">%%分别将字符串1、字符串2、字符串3……标注到图中，每个字符串对应的图标为画图时的图标</span></span><br><span class="line"><span class="comment">%%‘Location’用来指定标注显示的位置</span></span><br></pre></td></tr></table></figure>
+
+<p>下面是画图的效果，可以看到三次样条插值的效果非常像sin函数了！</p>
+<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625193759930.png" alt="image-20220625193759930" style="zoom: 67%;">
+
+
+
+
+
+<h3 id="3-n维插值问题"><a href="#3-n维插值问题" class="headerlink" title="3. n维插值问题"></a>3. n维插值问题</h3><img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625194049036.png" alt="image-20220625194049036" style="zoom:67%;">
+
+
+
+
+
+]]></content>
+      <categories>
+        <category>数模</category>
+      </categories>
+      <tags>
+        <tag>插值与拟合</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>1.层次分析法模型</title>
     <url>/2022/06/20/1-%E5%B1%82%E6%AC%A1%E5%88%86%E6%9E%90%E6%B3%95%E6%A8%A1%E5%9E%8B/</url>
     <content><![CDATA[<h3 id="1-模型介绍"><a href="#1-模型介绍" class="headerlink" title="1. 模型介绍"></a>1. 模型介绍</h3><blockquote>
@@ -149,110 +368,6 @@
       </tags>
   </entry>
   <entry>
-    <title>2.TOPSIS法</title>
-    <url>/2022/06/22/2-TOPSIS%E6%B3%95/</url>
-    <content><![CDATA[<h3 id="1-模型简介"><a href="#1-模型简介" class="headerlink" title="1. 模型简介"></a>1. 模型简介</h3><p><strong>TOPSIS 法</strong>（Technique for Order Preference by Similarity to an Ideal Solution，可翻译为逼近理想解排序法，国内常简称为<strong>优劣解距离法</strong>）是一种常用的综合评价方法，能充分利用原始数据的信息，其结果能精确地反映各评价方案之间的差距。</p>
-<span id="more"></span>
-
-<p>基本过程为先将原始数据矩阵统一指标类型（一般正向化处理） 得到正向化的矩阵，再对正向化的矩阵进行标准化处理以消除各指标量纲的影响，并找到有限方案中的最优方案和最劣方案，然后分 别计算各评价对象与最优方案和最劣方案间的距离，获得各评价对 象与最优方案的相对接近程度，以此作为评价优劣的依据。该方法 对数据分布及样本含量没有严格限制，数据计算简单易行。</p>
-<h3 id="2-模型思路"><a href="#2-模型思路" class="headerlink" title="2. 模型思路"></a>2. 模型思路</h3><blockquote>
-<p>首先之前谈到了层次分析法的不足，大概有两点：</p>
-<ul>
-<li>如果判断矩阵的size比较大，大于15，则判断矩阵和一致矩阵差异可能会很大，而且RI表格将没有对应的n</li>
-<li>如果决策层的指标的数据是已知的，如何利用数据使评价更加准确</li>
-</ul>
-</blockquote>
-<p>既然有了数据，一个比较自然的想法是根据数据来排个序，这样就能找到最优的方案了，事实上TOPSIS也是这样想的，首先来看一个例子吧，下面是一些已有的数据</p>
-<img src="/2022/06/22/2-TOPSIS%E6%B3%95/image-20220622232336080.png" alt="image-20220622232336080" style="zoom:50%;">
-
-<!--注：含氧量越高越好；PH值越接近7越好；细菌总数越少越好；植物性营养物量介于10‐20之间最佳，超 过20或低于10均不好。-->
-
-<p>我们常常说的排序要么从小到要么是从大到小，这里我们从大到小排，即第一名权重最大，上述表格的一个问题是，我们期待的数值的评价标准往往不是越大越好（例如PH并不是越大越好，而是越靠近7越好）所以我们不能简单地将数值作为排序的依据，而必须要将这些数值转换为一些数（例如PH以和7作差的绝对值来代替？），这些数使得对于满足我们的期待的数，其值越大，反之越小</p>
-<h4 id="（1）统一指标类型（正向化）"><a href="#（1）统一指标类型（正向化）" class="headerlink" title="（1）统一指标类型（正向化）"></a>（1）统一指标类型（正向化）</h4><p>在上文中我们介绍了为什么要进行指标的统一，这是因为我们需要排序，总结指标的类型，大体分为四类</p>
-<img src="/2022/06/22/2-TOPSIS%E6%B3%95/image-20220622233238046.png" alt="image-20220622233238046" style="zoom:67%;">
-
-<p>为了方便排序，我们<strong>统一转换为极大型指标</strong>，即越好的值统一之后越大，下面介绍如何对指标进行统一（或者说正向化）</p>
-<h5 id="1）极小型指标"><a href="#1）极小型指标" class="headerlink" title="1）极小型指标"></a>1）极小型指标</h5><p>极小型指标的特点是越小越好，所以要使得越小的值在统一之后越大</p>
-<ul>
-<li><p>一种易得的想法是用最大值减去该值，即<code>max-x</code></p>
-</li>
-<li><p>如果这一指标下所有值均为正数，也可以用倒数，即<code>1/x</code></p>
-</li>
-</ul>
-<h5 id="2）中间型指标"><a href="#2）中间型指标" class="headerlink" title="2）中间型指标"></a>2）中间型指标</h5><p>中间型指标的特点是越接近某个值越好，这时候你就想起绝对值了！但这样只猜对了一半，事实上我们刻画了程度这一概念</p>
-<img src="/2022/06/22/2-TOPSIS%E6%B3%95/image-20220622233904210.png" alt="image-20220622233904210" style="zoom:80%;">
-
-<p>M是距离X<em>best</em>最远的距离，用X<em>i</em>与X<em>best</em>的距离与之相除，刻画了X<em>i</em>和X<em>best</em>之间的偏移程度，越是偏离，结果越靠近1，为了正向化，我们希望越是偏离结果越小，所以用1减去了这个值</p>
-<blockquote>
-<p> 注意：正向化的公式不唯一，大家也可以结合自己的数据进行适当的修改</p>
-</blockquote>
-<h5 id="3）区间型指标"><a href="#3）区间型指标" class="headerlink" title="3）区间型指标"></a>3）区间型指标</h5><p>和中间型其实有点像，就是稍微细致考虑了符号的影响</p>
-<img src="/2022/06/22/2-TOPSIS%E6%B3%95/image-20220622234742933.png" alt="image-20220622234742933" style="zoom:80%;">
-
-
-
-<h4 id="（2）标准化"><a href="#（2）标准化" class="headerlink" title="（2）标准化"></a>（2）标准化</h4><p>通过正向化，矩阵评价指标都变成极大型指标了，但是不同的正向化以及指标本身的特点将导致指标的量纲不统一，为了去除量纲的影响，我们需要进行标准化</p>
-<blockquote>
-<p>标准化的方法有很多种，其主要目的就是去除量纲的影响，未来我们还可能见到更多 种的标准化方法，例如：(x‐x的均值)&#x2F;x的标准差；具体选用哪一种标准化的方法在多数情况下 并没有很大的限制，这里我们采用的是前人的论文中用的比较多的一种标准化方法</p>
-</blockquote>
-<p>这里我们使用的是如下标准化方法</p>
-<img src="/2022/06/22/2-TOPSIS%E6%B3%95/image-20220623100308974.png" alt="image-20220623100308974" style="zoom:67%;">
-
-
-
-<h4 id="（3）计算得分"><a href="#（3）计算得分" class="headerlink" title="（3）计算得分"></a>（3）计算得分</h4><p>怎样得到所谓的得分呢？一种想法就是直接用排名来作为得分，但是如果这样话，我们就可以随便地修改元素值，只需要保持排名不变，最终的评分就不会变，这种做法的不合理之处在于太过粗糙，这样得出的评分虽然有相关性，但是相关性不强（我们刚刚上面两步做出的数据都没有用了！），下面介绍当只有一个指标时采用的方法：</p>
-<p>构造评分函数：<code>(x-max)/(max-min)</code></p>
-<blockquote>
-<p>这里不建议使用数据可能的最大值和最小值作为max和min，主要原因是有很多指标不存在理论的最大值和最小值</p>
-</blockquote>
-<p>下面我们考虑多个指标的情况，我们可以通过上述单一指标的情况进行推广</p>
-<img src="/2022/06/22/2-TOPSIS%E6%B3%95/image-20220623102311447.png" alt="image-20220623102311447" style="zoom:67%;">
-
-<p>我们继续沿用距离这一解释，在下面使用欧氏距离来推广这一计算评分的公式</p>
-<img src="/2022/06/22/2-TOPSIS%E6%B3%95/image-20220623102435631.png" alt="image-20220623102435631" style="zoom: 80%;">
-
-<p>这里的最大值就是取每个指标的最大元素，拼凑成一个点，最小值就是取每个指标的最小元素，拼凑成一个点，然后分别计算要评价的对象与两点的距离<code>D+</code>和<code>D-</code>，最终计算得分为：<code>S=D-/(D+ + D-)</code></p>
-<h4 id="（4）将得分归一化"><a href="#（4）将得分归一化" class="headerlink" title="（4）将得分归一化"></a>（4）将得分归一化</h4><p>简单地对每个计算出来的得分进行归一化</p>
-<p><img src="/2022/06/22/2-TOPSIS%E6%B3%95/image-20220623103016809.png" alt="image-20220623103016809"></p>
-<h3 id="3-代码实现"><a href="#3-代码实现" class="headerlink" title="3. 代码实现"></a>3. 代码实现</h3><h4 id="1-主函数"><a href="#1-主函数" class="headerlink" title="1.主函数"></a>1.主函数</h4><figure class="highlight matlab"><table><tr><td class="code"><pre><span class="line"><span class="comment">%%  第一步，加载数据</span></span><br><span class="line">clear;clc</span><br><span class="line">load data_water_quality.mat</span><br><span class="line"><span class="comment">%%  第二步：判断是否需要正向化</span></span><br><span class="line">[n,m] = <span class="built_in">size</span>(X);</span><br><span class="line"><span class="built_in">disp</span>([<span class="string">&#x27;共有&#x27;</span> num2str(n) <span class="string">&#x27;个评价对象, &#x27;</span> num2str(m) <span class="string">&#x27;个评价指标&#x27;</span>]) </span><br><span class="line">Judge = input([<span class="string">&#x27;这&#x27;</span> num2str(m) <span class="string">&#x27;个指标是否需要经过正向化处理，需要请输入1 ，不需要输入0：  &#x27;</span>]);</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> Judge == <span class="number">1</span></span><br><span class="line">    Position = input(<span class="string">&#x27;请输入需要正向化处理的指标所在的列，例如第2、3、6三列需要处理，那么你需要输入[2,3,6]： &#x27;</span>); <span class="comment">%[2,3,4]</span></span><br><span class="line">    <span class="built_in">disp</span>(<span class="string">&#x27;请输入需要处理的这些列的指标类型（1：极小型， 2：中间型， 3：区间型） &#x27;</span>)</span><br><span class="line">    Type = input(<span class="string">&#x27;例如：第2列是极小型，第3列是区间型，第6列是中间型，就输入[1,3,2]：  &#x27;</span>); <span class="comment">%[2,1,3]</span></span><br><span class="line">    <span class="comment">% 注意，Position和Type是两个同维度的行向量</span></span><br><span class="line">    <span class="keyword">for</span> <span class="built_in">i</span> = <span class="number">1</span> : <span class="built_in">size</span>(Position,<span class="number">2</span>)  <span class="comment">%这里需要对这些列分别处理，因此我们需要知道一共要处理的次数，即循环的次数</span></span><br><span class="line">        X(:,Position(<span class="built_in">i</span>)) = Positivization(X(:,Position(<span class="built_in">i</span>)),Type(<span class="built_in">i</span>),Position(<span class="built_in">i</span>));</span><br><span class="line">    <span class="comment">% Positivization是我们自己定义的函数，其作用是进行正向化，其一共接收三个参数</span></span><br><span class="line">    <span class="comment">% 第一个参数是要正向化处理的那一列向量 X(:,Position(i))   回顾上一讲的知识，X(:,n)表示取第n列的全部元素</span></span><br><span class="line">    <span class="comment">% 第二个参数是对应的这一列的指标类型（1：极小型， 2：中间型， 3：区间型）</span></span><br><span class="line">    <span class="comment">% 第三个参数是告诉函数我们正在处理的是原始矩阵中的哪一列</span></span><br><span class="line">    <span class="comment">% 该函数有一个返回值，它返回正向化之后的指标，我们可以将其直接赋值给我们原始要处理的那一列向量</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line">    <span class="built_in">disp</span>(<span class="string">&#x27;正向化后的矩阵 X =  &#x27;</span>)</span><br><span class="line">    <span class="built_in">disp</span>(X)</span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line"><span class="comment">%% 第三步：对正向化后的矩阵进行标准化</span></span><br><span class="line">Z = X ./ <span class="built_in">repmat</span>(sum(X.*X) .^ <span class="number">0.5</span>, n, <span class="number">1</span>);</span><br><span class="line"><span class="built_in">disp</span>(<span class="string">&#x27;标准化矩阵 Z = &#x27;</span>)</span><br><span class="line"><span class="built_in">disp</span>(Z)</span><br><span class="line"></span><br><span class="line"><span class="comment">%% 第四步：计算与最大值的距离和最小值的距离，并算出得分</span></span><br><span class="line">D_P = sum([(Z - <span class="built_in">repmat</span>(<span class="built_in">max</span>(Z),n,<span class="number">1</span>)) .^ <span class="number">2</span> ],<span class="number">2</span>) .^ <span class="number">0.5</span>;   <span class="comment">% D+ 与最大值的距离向量</span></span><br><span class="line">D_N = sum([(Z - <span class="built_in">repmat</span>(<span class="built_in">min</span>(Z),n,<span class="number">1</span>)) .^ <span class="number">2</span> ],<span class="number">2</span>) .^ <span class="number">0.5</span>;   <span class="comment">% D- 与最小值的距离向量</span></span><br><span class="line">S = D_N ./ (D_P+D_N);    <span class="comment">% 未归一化的得分</span></span><br><span class="line"><span class="built_in">disp</span>(<span class="string">&#x27;最后的得分为：&#x27;</span>)</span><br><span class="line">stand_S = S / sum(S)</span><br><span class="line">[sorted_S,index] = <span class="built_in">sort</span>(stand_S ,<span class="string">&#x27;descend&#x27;</span>)</span><br></pre></td></tr></table></figure>
-
-
-
-<h4 id="2-Positivization函数"><a href="#2-Positivization函数" class="headerlink" title="2.Positivization函数"></a>2.Positivization函数</h4><figure class="highlight matlab"><table><tr><td class="code"><pre><span class="line"><span class="comment">% function [输出变量] = 函数名称(输入变量）  </span></span><br><span class="line"><span class="comment">% 函数的中间部分都是函数体</span></span><br><span class="line"><span class="comment">% 函数的最后要用end结尾</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="params">[posit_x]</span> = <span class="title">Positivization</span><span class="params">(x,type,i)</span></span></span><br><span class="line"><span class="comment">% 输入变量有三个：</span></span><br><span class="line"><span class="comment">% x：需要正向化处理的指标对应的原始列向量</span></span><br><span class="line"><span class="comment">% type： 指标的类型（1：极小型， 2：中间型， 3：区间型）</span></span><br><span class="line"><span class="comment">% i: 正在处理的是原始矩阵中的哪一列</span></span><br><span class="line"><span class="comment">% 输出变量posit_x表示：正向化后的列向量</span></span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">type</span> == <span class="number">1</span>  <span class="comment">%极小型</span></span><br><span class="line">        <span class="built_in">disp</span>([<span class="string">&#x27;第&#x27;</span> num2str(<span class="built_in">i</span>) <span class="string">&#x27;列是极小型，正在正向化&#x27;</span>] )</span><br><span class="line">        posit_x = Min2Max(x);  <span class="comment">%调用Min2Max函数来正向化</span></span><br><span class="line">        <span class="built_in">disp</span>([<span class="string">&#x27;第&#x27;</span> num2str(<span class="built_in">i</span>) <span class="string">&#x27;列极小型正向化处理完成&#x27;</span>] )</span><br><span class="line">        <span class="built_in">disp</span>(<span class="string">&#x27;~~~~~~~~~~~~~~~~~~~~分界线~~~~~~~~~~~~~~~~~~~~&#x27;</span>)</span><br><span class="line">    <span class="keyword">elseif</span> <span class="built_in">type</span> == <span class="number">2</span>  <span class="comment">%中间型</span></span><br><span class="line">        <span class="built_in">disp</span>([<span class="string">&#x27;第&#x27;</span> num2str(<span class="built_in">i</span>) <span class="string">&#x27;列是中间型&#x27;</span>] )</span><br><span class="line">        best = input(<span class="string">&#x27;请输入最佳的那一个值： &#x27;</span>);</span><br><span class="line">        posit_x = Mid2Max(x,best);</span><br><span class="line">        <span class="built_in">disp</span>([<span class="string">&#x27;第&#x27;</span> num2str(<span class="built_in">i</span>) <span class="string">&#x27;列中间型正向化处理完成&#x27;</span>] )</span><br><span class="line">        <span class="built_in">disp</span>(<span class="string">&#x27;~~~~~~~~~~~~~~~~~~~~分界线~~~~~~~~~~~~~~~~~~~~&#x27;</span>)</span><br><span class="line">    <span class="keyword">elseif</span> <span class="built_in">type</span> == <span class="number">3</span>  <span class="comment">%区间型</span></span><br><span class="line">        <span class="built_in">disp</span>([<span class="string">&#x27;第&#x27;</span> num2str(<span class="built_in">i</span>) <span class="string">&#x27;列是区间型&#x27;</span>] )</span><br><span class="line">        a = input(<span class="string">&#x27;请输入区间的下界： &#x27;</span>);</span><br><span class="line">        b = input(<span class="string">&#x27;请输入区间的上界： &#x27;</span>); </span><br><span class="line">        posit_x = Inter2Max(x,a,b);</span><br><span class="line">        <span class="built_in">disp</span>([<span class="string">&#x27;第&#x27;</span> num2str(<span class="built_in">i</span>) <span class="string">&#x27;列区间型正向化处理完成&#x27;</span>] )</span><br><span class="line">        <span class="built_in">disp</span>(<span class="string">&#x27;~~~~~~~~~~~~~~~~~~~~分界线~~~~~~~~~~~~~~~~~~~~&#x27;</span>)</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        <span class="built_in">disp</span>(<span class="string">&#x27;没有这种类型的指标，请检查Type向量中是否有除了1、2、3之外的其他值&#x27;</span>)</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
-
-
-
-<h4 id="3-Min2Max函数"><a href="#3-Min2Max函数" class="headerlink" title="3.Min2Max函数"></a>3.Min2Max函数</h4><figure class="highlight matlab"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="params">[posit_x]</span> = <span class="title">Min2Max</span><span class="params">(x)</span></span></span><br><span class="line">    posit_x = <span class="built_in">max</span>(x) - x;</span><br><span class="line">     <span class="comment">%posit_x = 1 ./ x;    %如果x全部都大于0，也可以这样正向化</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
-
-
-
-<h4 id="4-Mid2Max函数"><a href="#4-Mid2Max函数" class="headerlink" title="4.Mid2Max函数"></a>4.Mid2Max函数</h4><figure class="highlight matlab"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="params">[posit_x]</span> = <span class="title">Mid2Max</span><span class="params">(x,best)</span></span></span><br><span class="line">    M = <span class="built_in">max</span>(<span class="built_in">abs</span>(x-best));</span><br><span class="line">    posit_x = <span class="number">1</span> - <span class="built_in">abs</span>(x-best) / M;</span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
-
-
-
-<h4 id="5-Inter2Max函数"><a href="#5-Inter2Max函数" class="headerlink" title="5.Inter2Max函数"></a>5.Inter2Max函数</h4><figure class="highlight matlab"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="params">[posit_x]</span> = <span class="title">Inter2Max</span><span class="params">(x,a,b)</span></span></span><br><span class="line">    r_x = <span class="built_in">size</span>(x,<span class="number">1</span>);  <span class="comment">% row of x </span></span><br><span class="line">    M = <span class="built_in">max</span>([a-<span class="built_in">min</span>(x),<span class="built_in">max</span>(x)-b]);</span><br><span class="line">    posit_x = <span class="built_in">zeros</span>(r_x,<span class="number">1</span>);   <span class="comment">%zeros函数用法: zeros(3)  zeros(3,1)  ones(3)</span></span><br><span class="line">    <span class="comment">% 初始化posit_x全为0  初始化的目的是节省处理时间</span></span><br><span class="line">    <span class="keyword">for</span> <span class="built_in">i</span> = <span class="number">1</span>: r_x</span><br><span class="line">        <span class="keyword">if</span> x(<span class="built_in">i</span>) &lt; a</span><br><span class="line">           posit_x(<span class="built_in">i</span>) = <span class="number">1</span>-(a-x(<span class="built_in">i</span>))/M;</span><br><span class="line">        <span class="keyword">elseif</span> x(<span class="built_in">i</span>) &gt; b</span><br><span class="line">           posit_x(<span class="built_in">i</span>) = <span class="number">1</span>-(x(<span class="built_in">i</span>)-b)/M;</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">           posit_x(<span class="built_in">i</span>) = <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
-
-
-
-<h3 id="4-模型拓展"><a href="#4-模型拓展" class="headerlink" title="4. 模型拓展"></a>4. 模型拓展</h3><p>在上面的介绍中，我们认为每个指标同等重要，即他们的权重都是1，但很多情况下指标之间重要性不同，因此我们给予不同权重。（在最后一步计算得分时）</p>
-<img src="/2022/06/22/2-TOPSIS%E6%B3%95/image-20220624143826537.png" alt="image-20220624143826537" style="zoom: 80%;">
-
-
-
-<p>权重的确定可以通过1.1中的层次分析法确定，但是层次分析法还是太主观了</p>
-<img src="/2022/06/22/2-TOPSIS%E6%B3%95/image-20220624144008452.png" alt="image-20220624144008452" style="zoom:80%;">
-
-
-
-]]></content>
-      <categories>
-        <category>数模</category>
-      </categories>
-      <tags>
-        <tag>评价类问题</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>4.拟合算法</title>
     <url>/2022/06/26/4-%E6%8B%9F%E5%90%88%E7%AE%97%E6%B3%95/</url>
     <content><![CDATA[<h3 id="1-概述"><a href="#1-概述" class="headerlink" title="1. 概述"></a>1. 概述</h3><p>拟合的目标是寻找一个函数（曲线），使得该曲线在某种准则下与所有数据点最为接近，即曲线拟合的最好（最小化损失函数）</p>
@@ -342,170 +457,6 @@
       </categories>
       <tags>
         <tag>插值与拟合</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>3.插值算法</title>
-    <url>/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/</url>
-    <content><![CDATA[<h3 id="1-概述"><a href="#1-概述" class="headerlink" title="1. 概述"></a>1. 概述</h3><blockquote>
-<p>什么是插值算法？为什么需要插值算法？插值法分类？</p>
-</blockquote>
-<p>关于插值算法的专业定义如下：</p>
-<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625112613360.png" alt="image-20220625112613360" style="zoom: 67%;">
-
-<span id="more"></span>
-
-<ul>
-<li><p>简单来说，插值算法就是构造经过所有插值节点的函数，而与之类似的拟合并不需要经过这些点</p>
-</li>
-<li><p>当给定数据量比较少的时候，为了进行数据、模型的处理和分析，我们需要模拟产生一些新的靠谱的数据来满足数据的需求，这就是我们为什么需要进行插值（数据量比较大的时候用拟合更合适）</p>
-</li>
-<li><p>插值法主要分三类：插值多项式（构造代数多项式），分段插值，三角插值（需要用到傅里叶变换），下面仅考虑前两种插值方法</p>
-</li>
-</ul>
-<blockquote>
-<p>除了做插值来补充数据之外，插值还可以做短期数据的预测！有时效果还不错</p>
-</blockquote>
-<h3 id="2-一维插值问题"><a href="#2-一维插值问题" class="headerlink" title="2. 一维插值问题"></a>2. 一维插值问题</h3><p>一个通常遇到的问题，下面介绍解决这类插值的方法</p>
-<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625113217863.png" alt="image-20220625113217863" style="zoom: 67%;">
-
-<h4 id="（1）一般插值多项式"><a href="#（1）一般插值多项式" class="headerlink" title="（1）一般插值多项式"></a>（1）一般插值多项式</h4><img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625113552820.png" alt="image-20220625113552820" style="zoom:67%;">
-
-<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625113611867.png" alt="image-20220625113611867" style="zoom: 67%;">
-
-<h4 id="（2）拉格朗日插值法"><a href="#（2）拉格朗日插值法" class="headerlink" title="（2）拉格朗日插值法"></a>（2）拉格朗日插值法</h4><p>这种方法可以达到经过插值节点的目标，下面通过插值节点的增加阐述其思想：</p>
-<p>当插值节点数量为2时，构造下面的函数，当x&#x3D;x<del>0</del>时y0前面系数为1，y<del>1</del>前系数为0，结果为y<del>0</del>，同理当x&#x3D;x<del>1</del></p>
-<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625114506511.png" alt="image-20220625114506511" style="zoom: 50%;">
-
-<p>当插值节点数量为3时，构造下面的函数，当x&#x3D;x<del>0</del>时y0前面系数为1，y<del>1</del>前系数为0，y<del>2</del>前系数为0，结果为y<del>0</del>，其他节点同理可得</p>
-<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625114506511.png" alt="image-20220625114506511" style="zoom: 50%;">
-
-<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625115006790.png" alt="image-20220625115006790" style="zoom:50%;">
-
-<p>易知拉格朗日构造的函数结构为：对应的y<del>j</del>乘以一项，这项的分子为(x-x<del>i</del>)的乘积，分母为(x<del>j</del>-x<del>i</del>)的乘积，其中i !&#x3D;j</p>
-<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625115445016.png" alt="image-20220625115445016" style="zoom:67%;">
-
-<h4 id="（3）牛顿插值法"><a href="#（3）牛顿插值法" class="headerlink" title="（3）牛顿插值法"></a>（3）牛顿插值法</h4><img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625190328220.png" alt="image-20220625190328220" style="zoom:67%;">
-
-
-
-<blockquote>
-<p>下面对上述的拉格朗日和牛顿插值进行总结：</p>
-<ul>
-<li>与拉格朗日插值法相比，牛顿插值法的计算过程具有继承性。 （牛顿插值法每次插值只和前n项的值有关，这样每次只要在原来的函数上添加，就是说当添加一个插值节点时，拉格朗日需要重新写整个函数，而牛顿只需要添加一项</li>
-<li>都存在龙格现象：即在两端处波动极大,产生明显的震荡。故在不熟悉曲线运动趋势的前提下，不要轻易使用高次插值。</li>
-</ul>
-<p>例：对下述函数使用拉格朗日插值，观察插值得到的函数</p>
-<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625190908334.png" alt="image-20220625190908334" style="zoom:67%;">
-
-<p>下面是不同次数插值得到的效果，可以看到高次插值在两端导致震荡</p>
-<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625191036744.png" alt="image-20220625191036744" style="zoom: 67%;">
-
-<ul>
-<li>除此之外，两种插值方法仅仅要求插值多项式在插值节点处与被插函数有相等的函数值，而这种插值多项式却不能全面反映被插值函数的性态，在许多实际问题中，不仅要求插值函数与被插值函数在所有节点处有<strong>相同的函数值</strong>，它也需要在一个或全部节点上插值多项式与被插函数有<strong>相同的低阶甚至高阶的导数值</strong>，这是拉格朗日和牛顿插值法无法做到的</li>
-</ul>
-</blockquote>
-<h4 id="（4）分段线性插值"><a href="#（4）分段线性插值" class="headerlink" title="（4）分段线性插值"></a>（4）分段线性插值</h4><p>分段线性插值的思路就是相邻的两点构成一条线段，进而构成整个函数</p>
-<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625191545265.png" alt="image-20220625191545265" style="zoom:67%;">
-
-<h4 id="（5）分段二次插值"><a href="#（5）分段二次插值" class="headerlink" title="（5）分段二次插值"></a>（5）分段二次插值</h4><p>三个节点的拉格朗日+分段插值</p>
-<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625191824307.png" alt="image-20220625191824307" style="zoom: 67%;">
-
-
-
-<h4 id="（6）埃尔米特-Hermite-插值和分段三次埃尔米特插值"><a href="#（6）埃尔米特-Hermite-插值和分段三次埃尔米特插值" class="headerlink" title="（6）埃尔米特(Hermite)插值和分段三次埃尔米特插值"></a>（6）埃尔米特(Hermite)插值和分段三次埃尔米特插值</h4><p>埃尔米特插值多项式不但要求在节点上的函数值相等，而且还要求对应的导数值也相等,甚至要求高阶导数也相等，这样就解决了拉格朗日插值法和牛顿插值法的第二个缺点</p>
-<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625192150450.png" alt="image-20220625192150450" style="zoom:67%;">
-
-<p>但是直接使用Hermite插值得到的多项式次数较高，也存在着龙格现象， 因此在实际应用中，往往使用分段三次 Hermite 插值多项式 (PCHIP)。</p>
-<blockquote>
-<p>这里我们可以对原理有个大概的了解，在实现的时候matlab有函数直接调用</p>
-</blockquote>
-<figure class="highlight matlab"><table><tr><td class="code"><pre><span class="line"><span class="comment">%%matlab内置函数pchip来做分段三次埃尔米特插值</span></span><br><span class="line"><span class="comment">%%p = pchip(x,y, new_x)</span></span><br><span class="line"><span class="comment">%%x是已知的样本点的横坐标;y是已知的样本点的纵坐标;new_x是要插入处对应的横坐标</span></span><br><span class="line">x = ‐<span class="built_in">pi</span>:<span class="built_in">pi</span>; y = <span class="built_in">sin</span>(x);</span><br><span class="line">new_x = ‐<span class="built_in">pi</span>:<span class="number">0.1</span>:<span class="built_in">pi</span>;</span><br><span class="line">p = pchip(x,y,new_x);</span><br><span class="line"><span class="built_in">plot</span>(x, y, <span class="string">&#x27;o&#x27;</span>, new_x, p, <span class="string">&#x27;r‐&#x27;</span>)</span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<p>附plot函数的一点点说明</p>
-<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625193021282.png" alt="image-20220625193021282" style="zoom: 67%;">
-</blockquote>
-<h4 id="（7）三次样条插值"><a href="#（7）三次样条插值" class="headerlink" title="（7）三次样条插值"></a>（7）三次样条插值</h4><blockquote>
-<p>比埃尔米特更加苛刻的条件构造插值函数</p>
-</blockquote>
-<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625193205167.png" alt="image-20220625193205167" style="zoom:67%;">
-
-<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625193232406.png" alt="image-20220625193232406" style="zoom:67%;">
-
-<blockquote>
-<p>这里我们可以对原理有个大概的了解，在实现的时候matlab有函数直接调用</p>
-</blockquote>
-<figure class="highlight matlab"><table><tr><td class="code"><pre><span class="line"><span class="comment">%%p = spline (x,y, new_x) </span></span><br><span class="line"><span class="comment">%%x是已知的样本点的横坐标;y是已知的样本点的纵坐标;new_x是要插入处对应的横坐标</span></span><br><span class="line">x=-<span class="built_in">pi</span>:<span class="built_in">pi</span>;</span><br><span class="line">y=<span class="built_in">sin</span>(x);</span><br><span class="line">new_x=-<span class="built_in">pi</span>:<span class="number">0.1</span>:<span class="built_in">pi</span>;</span><br><span class="line">p1=pchip(x,y,new_x);</span><br><span class="line">p2=spline(x,y,new_x);</span><br><span class="line"><span class="built_in">plot</span>(x,y,<span class="string">&#x27;o&#x27;</span>,new_x,p1,<span class="string">&#x27;-r&#x27;</span>,new_x,p2,<span class="string">&#x27;-b&#x27;</span>);</span><br><span class="line"><span class="built_in">legend</span>(<span class="string">&quot;样本点&quot;</span>,<span class="string">&quot;Hermite插值&quot;</span>,<span class="string">&quot;三次样条插值&quot;</span>,<span class="string">&quot;location&quot;</span>,<span class="string">&quot;SouthEast&quot;</span>);</span><br><span class="line"><span class="comment">%%legend(string1,string2,string3, …)</span></span><br><span class="line"><span class="comment">%%分别将字符串1、字符串2、字符串3……标注到图中，每个字符串对应的图标为画图时的图标</span></span><br><span class="line"><span class="comment">%%‘Location’用来指定标注显示的位置</span></span><br></pre></td></tr></table></figure>
-
-<p>下面是画图的效果，可以看到三次样条插值的效果非常像sin函数了！</p>
-<img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625193759930.png" alt="image-20220625193759930" style="zoom: 67%;">
-
-
-
-
-
-<h3 id="3-n维插值问题"><a href="#3-n维插值问题" class="headerlink" title="3. n维插值问题"></a>3. n维插值问题</h3><img src="/2022/06/25/3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95/image-20220625194049036.png" alt="image-20220625194049036" style="zoom:67%;">
-
-
-
-
-
-]]></content>
-      <categories>
-        <category>数模</category>
-      </categories>
-      <tags>
-        <tag>插值与拟合</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>6.典型相关分析</title>
-    <url>/2022/07/17/6-%E5%85%B8%E5%9E%8B%E7%9B%B8%E5%85%B3%E5%88%86%E6%9E%90/</url>
-    <content><![CDATA[<h3 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h3><p>典型相关分析是研究两组变量（每组变量下可能有多个指标）之间的相关关系的一种多元统计方法，它能够揭示两组变量之间的内在联系。</p>
-<span id="more"></span>
-
-<p>比如说这样的问题：</p>
-<p><img src="/2022/07/17/6-%E5%85%B8%E5%9E%8B%E7%9B%B8%E5%85%B3%E5%88%86%E6%9E%90/image-20220718143956038.png" alt="image-20220718143956038"></p>
-<blockquote>
-<p>与上一节的相关系数相比，典型相关分析每一组有多个变量，而不仅仅只有一个</p>
-</blockquote>
-<h3 id="二、SPSS求解"><a href="#二、SPSS求解" class="headerlink" title="二、SPSS求解"></a>二、SPSS求解</h3><blockquote>
-<p>原理有点复杂了，对于编程选手俺就跳过了，直接SPSS傻瓜求解</p>
-</blockquote>
-<p>下面以问题为例来做典型相关分析，左侧为生理指标，右侧为训练指标，探讨两指标的相关性</p>
-<p><img src="/2022/07/17/6-%E5%85%B8%E5%9E%8B%E7%9B%B8%E5%85%B3%E5%88%86%E6%9E%90/image-20220718144344348.png" alt="image-20220718144344348"></p>
-<h4 id="（1）导入数据"><a href="#（1）导入数据" class="headerlink" title="（1）导入数据"></a>（1）导入数据</h4><img src="/2022/07/17/6-%E5%85%B8%E5%9E%8B%E7%9B%B8%E5%85%B3%E5%88%86%E6%9E%90/image-20220718144546940.png" alt="image-20220718144546940" style="zoom:67%;">
-
-<h4 id="（2）检查数据类型"><a href="#（2）检查数据类型" class="headerlink" title="（2）检查数据类型"></a>（2）检查数据类型</h4><img src="/2022/07/17/6-%E5%85%B8%E5%9E%8B%E7%9B%B8%E5%85%B3%E5%88%86%E6%9E%90/image-20220718144728481.png" alt="image-20220718144728481" style="zoom:67%;">
-
-<img src="/2022/07/17/6-%E5%85%B8%E5%9E%8B%E7%9B%B8%E5%85%B3%E5%88%86%E6%9E%90/image-20220718144809795.png" alt="image-20220718144809795" style="zoom:67%;">
-
-<blockquote>
-<p>注意需要将数据类型修改为标度，所谓有序类似于排名，名义类似于男女，标度为普通数据</p>
-</blockquote>
-<h4 id="（3）进行典型相关分析"><a href="#（3）进行典型相关分析" class="headerlink" title="（3）进行典型相关分析"></a>（3）进行典型相关分析</h4><blockquote>
-<p>这里如果没有安装到默认位置，就得用代码了，所以俺又重新装了一遍</p>
-</blockquote>
-<img src="/2022/07/17/6-%E5%85%B8%E5%9E%8B%E7%9B%B8%E5%85%B3%E5%88%86%E6%9E%90/image-20220718150613848.png" alt="image-20220718150613848" style="zoom: 80%;">
-
-<h4 id="（4）输出结果分析"><a href="#（4）输出结果分析" class="headerlink" title="（4）输出结果分析"></a>（4）输出结果分析</h4><h5 id="2）典型相关系数"><a href="#2）典型相关系数" class="headerlink" title="2）典型相关系数"></a>2）典型相关系数</h5><h5 id><a href="#" class="headerlink" title></a><img src="/2022/07/17/6-%E5%85%B8%E5%9E%8B%E7%9B%B8%E5%85%B3%E5%88%86%E6%9E%90/image-20220718151243308.png" alt="image-20220718151243308"></h5><p>修改成中文如下，可以看到只有第一组的P值小于0.1，其余的都大于0.1，故只有第一组有意义，之后都只需要看第一组即可</p>
-<p><img src="/2022/07/17/6-%E5%85%B8%E5%9E%8B%E7%9B%B8%E5%85%B3%E5%88%86%E6%9E%90/image-20220718151255578.png" alt="image-20220718151255578"></p>
-<h5 id="2）典型相关变量"><a href="#2）典型相关变量" class="headerlink" title="2）典型相关变量"></a>2）典型相关变量</h5><p>将左边英文的表格翻译成右侧的表格，因为只有第一组是典型的，所以只需要写第一组的典型相关变量</p>
-<p><img src="/2022/07/17/6-%E5%85%B8%E5%9E%8B%E7%9B%B8%E5%85%B3%E5%88%86%E6%9E%90/image-20220718151508924.png" alt="image-20220718151508924" style="zoom: 67%;"><img src="/2022/07/17/6-%E5%85%B8%E5%9E%8B%E7%9B%B8%E5%85%B3%E5%88%86%E6%9E%90/image-20220718151527809.png" alt="image-20220718151527809" style="zoom:67%;"></p>
-<p>典型变量每个分量前面的系数代表着重要程度，可结合典型相关系数进行分析</p>
-<h5 id="3）典型载荷分析"><a href="#3）典型载荷分析" class="headerlink" title="3）典型载荷分析"></a>3）典型载荷分析</h5><p><img src="/2022/07/17/6-%E5%85%B8%E5%9E%8B%E7%9B%B8%E5%85%B3%E5%88%86%E6%9E%90/image-20220718152435478.png" alt="image-20220718152426377" style="zoom:67%;"><img src="/2022/07/17/6-%E5%85%B8%E5%9E%8B%E7%9B%B8%E5%85%B3%E5%88%86%E6%9E%90/image-20220718152457310.png" alt="image-20220718152457310" style="zoom:67%;"></p>
-<p><img src="/2022/07/17/6-%E5%85%B8%E5%9E%8B%E7%9B%B8%E5%85%B3%E5%88%86%E6%9E%90/image-20220718152323228.png" alt="image-20220718152323228" style="zoom:67%;"><img src="/2022/07/17/6-%E5%85%B8%E5%9E%8B%E7%9B%B8%E5%85%B3%E5%88%86%E6%9E%90/image-20220718152350011.png" alt="image-20220718152350011" style="zoom:67%;"></p>
-<p>上下翻译一下，只看典型相关变量第一组，根据第一组进行分析</p>
-<img src="/2022/07/17/6-%E5%85%B8%E5%9E%8B%E7%9B%B8%E5%85%B3%E5%88%86%E6%9E%90/image-20220718152700173.png" alt="image-20220718152700173" style="zoom:67%;">
-
-
-
-
-
-]]></content>
-      <tags>
-        <tag>典型相关分析</tag>
       </tags>
   </entry>
   <entry>
@@ -643,6 +594,232 @@
 ]]></content>
       <tags>
         <tag>相关系数</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>6.典型相关分析</title>
+    <url>/2022/07/17/6-%E5%85%B8%E5%9E%8B%E7%9B%B8%E5%85%B3%E5%88%86%E6%9E%90/</url>
+    <content><![CDATA[<h3 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h3><p>典型相关分析是研究两组变量（每组变量下可能有多个指标）之间的相关关系的一种多元统计方法，它能够揭示两组变量之间的内在联系。</p>
+<span id="more"></span>
+
+<p>比如说这样的问题：</p>
+<p><img src="/2022/07/17/6-%E5%85%B8%E5%9E%8B%E7%9B%B8%E5%85%B3%E5%88%86%E6%9E%90/image-20220718143956038.png" alt="image-20220718143956038"></p>
+<blockquote>
+<p>与上一节的相关系数相比，典型相关分析每一组有多个变量，而不仅仅只有一个</p>
+</blockquote>
+<h3 id="二、SPSS求解"><a href="#二、SPSS求解" class="headerlink" title="二、SPSS求解"></a>二、SPSS求解</h3><blockquote>
+<p>原理有点复杂了，对于编程选手俺就跳过了，直接SPSS傻瓜求解</p>
+</blockquote>
+<p>下面以问题为例来做典型相关分析，左侧为生理指标，右侧为训练指标，探讨两指标的相关性</p>
+<p><img src="/2022/07/17/6-%E5%85%B8%E5%9E%8B%E7%9B%B8%E5%85%B3%E5%88%86%E6%9E%90/image-20220718144344348.png" alt="image-20220718144344348"></p>
+<h4 id="（1）导入数据"><a href="#（1）导入数据" class="headerlink" title="（1）导入数据"></a>（1）导入数据</h4><img src="/2022/07/17/6-%E5%85%B8%E5%9E%8B%E7%9B%B8%E5%85%B3%E5%88%86%E6%9E%90/image-20220718144546940.png" alt="image-20220718144546940" style="zoom:67%;">
+
+<h4 id="（2）检查数据类型"><a href="#（2）检查数据类型" class="headerlink" title="（2）检查数据类型"></a>（2）检查数据类型</h4><img src="/2022/07/17/6-%E5%85%B8%E5%9E%8B%E7%9B%B8%E5%85%B3%E5%88%86%E6%9E%90/image-20220718144728481.png" alt="image-20220718144728481" style="zoom:67%;">
+
+<img src="/2022/07/17/6-%E5%85%B8%E5%9E%8B%E7%9B%B8%E5%85%B3%E5%88%86%E6%9E%90/image-20220718144809795.png" alt="image-20220718144809795" style="zoom:67%;">
+
+<blockquote>
+<p>注意需要将数据类型修改为标度，所谓有序类似于排名，名义类似于男女，标度为普通数据</p>
+</blockquote>
+<h4 id="（3）进行典型相关分析"><a href="#（3）进行典型相关分析" class="headerlink" title="（3）进行典型相关分析"></a>（3）进行典型相关分析</h4><blockquote>
+<p>这里如果没有安装到默认位置，就得用代码了，所以俺又重新装了一遍</p>
+</blockquote>
+<img src="/2022/07/17/6-%E5%85%B8%E5%9E%8B%E7%9B%B8%E5%85%B3%E5%88%86%E6%9E%90/image-20220718150613848.png" alt="image-20220718150613848" style="zoom: 80%;">
+
+<h4 id="（4）输出结果分析"><a href="#（4）输出结果分析" class="headerlink" title="（4）输出结果分析"></a>（4）输出结果分析</h4><h5 id="2）典型相关系数"><a href="#2）典型相关系数" class="headerlink" title="2）典型相关系数"></a>2）典型相关系数</h5><h5 id><a href="#" class="headerlink" title></a><img src="/2022/07/17/6-%E5%85%B8%E5%9E%8B%E7%9B%B8%E5%85%B3%E5%88%86%E6%9E%90/image-20220718151243308.png" alt="image-20220718151243308"></h5><p>修改成中文如下，可以看到只有第一组的P值小于0.1，其余的都大于0.1，故只有第一组有意义，之后都只需要看第一组即可</p>
+<p><img src="/2022/07/17/6-%E5%85%B8%E5%9E%8B%E7%9B%B8%E5%85%B3%E5%88%86%E6%9E%90/image-20220718151255578.png" alt="image-20220718151255578"></p>
+<h5 id="2）典型相关变量"><a href="#2）典型相关变量" class="headerlink" title="2）典型相关变量"></a>2）典型相关变量</h5><p>将左边英文的表格翻译成右侧的表格，因为只有第一组是典型的，所以只需要写第一组的典型相关变量</p>
+<p><img src="/2022/07/17/6-%E5%85%B8%E5%9E%8B%E7%9B%B8%E5%85%B3%E5%88%86%E6%9E%90/image-20220718151508924.png" alt="image-20220718151508924" style="zoom: 67%;"><img src="/2022/07/17/6-%E5%85%B8%E5%9E%8B%E7%9B%B8%E5%85%B3%E5%88%86%E6%9E%90/image-20220718151527809.png" alt="image-20220718151527809" style="zoom:67%;"></p>
+<p>典型变量每个分量前面的系数代表着重要程度，可结合典型相关系数进行分析</p>
+<h5 id="3）典型载荷分析"><a href="#3）典型载荷分析" class="headerlink" title="3）典型载荷分析"></a>3）典型载荷分析</h5><p><img src="/2022/07/17/6-%E5%85%B8%E5%9E%8B%E7%9B%B8%E5%85%B3%E5%88%86%E6%9E%90/image-20220718152435478.png" alt="image-20220718152426377" style="zoom:67%;"><img src="/2022/07/17/6-%E5%85%B8%E5%9E%8B%E7%9B%B8%E5%85%B3%E5%88%86%E6%9E%90/image-20220718152457310.png" alt="image-20220718152457310" style="zoom:67%;"></p>
+<p><img src="/2022/07/17/6-%E5%85%B8%E5%9E%8B%E7%9B%B8%E5%85%B3%E5%88%86%E6%9E%90/image-20220718152323228.png" alt="image-20220718152323228" style="zoom:67%;"><img src="/2022/07/17/6-%E5%85%B8%E5%9E%8B%E7%9B%B8%E5%85%B3%E5%88%86%E6%9E%90/image-20220718152350011.png" alt="image-20220718152350011" style="zoom:67%;"></p>
+<p>上下翻译一下，只看典型相关变量第一组，根据第一组进行分析</p>
+<img src="/2022/07/17/6-%E5%85%B8%E5%9E%8B%E7%9B%B8%E5%85%B3%E5%88%86%E6%9E%90/image-20220718152700173.png" alt="image-20220718152700173" style="zoom:67%;">
+
+
+
+
+
+]]></content>
+      <categories>
+        <category>数模</category>
+      </categories>
+      <tags>
+        <tag>典型相关分析</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>7.多元回归分析</title>
+    <url>/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/</url>
+    <content><![CDATA[<h3 id="一、概念"><a href="#一、概念" class="headerlink" title="一、概念"></a>一、概念</h3><p>回归分析是数据分析中最基本和最重要的分析工具，其任务是研究自变量x与因变量y之间的相关关系，尝试解释y的形成机制，使用x去预测y</p>
+<span id="more"></span>
+
+<h4 id="1-回归分析的使命"><a href="#1-回归分析的使命" class="headerlink" title="1.回归分析的使命"></a>1.回归分析的使命</h4><img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720190456502.png" alt="image-20220720190456502" style="zoom: 67%;">
+
+<p>即：识别重要变量、判断相关性方向、估计各个自变量重要性</p>
+<p>相应的基本问题如下例所示：</p>
+<p><img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720190719327.png" alt="image-20220720190719327"></p>
+<p>问题分析：</p>
+<ul>
+<li>第一问就是要求进行回归，得到回归系数和表达式</li>
+<li>第二问就是需要判断哪个变量对因变量影响最大，需要对回归系数进行标准化</li>
+</ul>
+<h4 id="2-自变量x"><a href="#2-自变量x" class="headerlink" title="2.自变量x"></a>2.自变量x</h4><blockquote>
+<p>最简单的自变量当然就是定量变量了，但是往往会有定性的变量</p>
+</blockquote>
+<p>如果自变量中有类似性别、地域这样的定性的虚拟变量时，我们需要引入虚拟变量将定性变量转换为定量变量，如对于性别而言，引入变量female，female&#x3D;1表示女性，female&#x3D;0表示男性。</p>
+<h4 id="3-因变量y"><a href="#3-因变量y" class="headerlink" title="3.因变量y"></a>3.因变量y</h4><blockquote>
+<p>实际中，因变量类型是比较多的，主要分为以下几种：</p>
+</blockquote>
+<img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720191439199.png" alt="image-20220720191439199" style="zoom: 67%;">
+
+<p>对于不同类型的因变量y，采用的回归策略也是不同的，本章主要针对连续数值类型的y所做的线性回归</p>
+<img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720191530826.png" alt="image-20220720191530826" style="zoom:67%;">
+
+<h4 id="4-数据"><a href="#4-数据" class="headerlink" title="4.数据"></a>4.数据</h4><p>题目所给数据大体分为三类：</p>
+<table>
+<thead>
+<tr>
+<th>数据类型</th>
+<th>举例</th>
+<th>解释</th>
+<th>常用建模方法</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>横截面数据</td>
+<td>全国各省份2018年GDP的数据；发放问卷所得数据；某测试所得成绩</td>
+<td>在某一时点收集的不同对象的数据，时间维度一致</td>
+<td>多元线性回归</td>
+</tr>
+<tr>
+<td>时间序列数据</td>
+<td>中国历年GDP数据；一天体温数据</td>
+<td>对同一对象在不同时间连续观察所取得的数据</td>
+<td>移动平均、指数平滑、ARIMA、GARCH、VAR、协积</td>
+</tr>
+<tr>
+<td>面板数据</td>
+<td>2008‐2018年，我国各省份GDP的数据</td>
+<td>横截面数据与时间序列数据综合起来的一种数据资源</td>
+<td>固定效应和随机效应、静态面板和动态面板</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>本章主要分析对象为横截面数据，使用建模方法为多元线性回归，注重其解释功能而不是预测功能</p>
+</blockquote>
+<h4 id="6-相关性"><a href="#6-相关性" class="headerlink" title="6.相关性"></a>6.相关性</h4><p>相关性!&#x3D;因果性，因果性这件事是比较难通过数据来分析得到的</p>
+<p>例如：统计数据表明：游泳死亡人数越高，雪糕卖得越多 （游泳死亡人数和雪糕售出量之间呈显著正相关）</p>
+<h3 id="二、多元线性回归分析"><a href="#二、多元线性回归分析" class="headerlink" title="二、多元线性回归分析"></a>二、多元线性回归分析</h3><h4 id="1-“线性”"><a href="#1-“线性”" class="headerlink" title="1.“线性”"></a>1.“线性”</h4><p>我们可以先从一元线性回归入手，所谓一元线性回归，就是之前的拟合，在拟合中我们同样提到了线性这一概念，这里的线性与拟合所说线性一致，指对参数而言是线性的。</p>
+<p>一元线性回归（拟合）：</p>
+<img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720192652702.png" alt="image-20220720192652702" style="zoom:67%;">
+
+<blockquote>
+<p>上面把y-beta-beta*xi定义为残差ui，整个式子称之为残差平方和，u这一变量在后面称之为扰动项</p>
+</blockquote>
+<p>关于线性这件事，因为是对参数线性，对于变量，我们要以整体的观点看待，这样的数据在回归前可以提前计算为一个整体</p>
+<p><img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720192837411.png" alt="image-20220720192837411"></p>
+<h4 id="2-回归系数"><a href="#2-回归系数" class="headerlink" title="2.回归系数"></a>2.回归系数</h4><blockquote>
+<p>回归系数就是 <code>因变量=f(自变量)</code>自变量前的系数</p>
+</blockquote>
+<p>通过回归得到了回归系数，我们需要对其进行解释，主要对显著的自变量前的回归系数进行解释，注意解释时“平均”二字</p>
+<img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720193212096.png" alt="image-20220720193212096" style="zoom:67%;">
+
+<img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720193225640.png" alt="image-20220720193225640" style="zoom:67%;">
+
+<p>虚拟变量的解释，以性别（自变量）对于工资（因变量）为例进行解释：</p>
+<img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720193340622.png" alt="image-20220720193340622" style="zoom:67%;">
+
+<blockquote>
+<p>为什么回归模型中加入自然对数呢？</p>
+<img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720193446326.png" alt="image-20220720193446326" style="zoom:67%;">
+</blockquote>
+<h4 id="3-回归分析"><a href="#3-回归分析" class="headerlink" title="3.回归分析"></a>3.回归分析</h4><p>使用软件stata,先导入数据，然后输入下面的命令即可</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">regress y x1 x2 ... xk,beta robust</span><br></pre></td></tr></table></figure>
+
+<p>上面的beta是为了得到标准后的回归系数，解决哪个自变量影响最大这一问题，robust是为了解决异方差的问题，大致得到下面的表，（beta和robust的额外信息在下面没体现）</p>
+<p><img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720194623354.png" alt="image-20220720194623354"></p>
+<p>1）首先看序号1的位置，P值有没有小于0.1（90%置信水平）或者0.05（95%置信水平），小于则拒绝联合显著性检验原假设，即回归模型正确，下面的R²看上去比较小的样子，对结果有什么影响吗？</p>
+<blockquote>
+<p>这里影响不大，原因如下：</p>
+<p><img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720194930439.png" alt="image-20220720194930439"></p>
+</blockquote>
+<p>在论文中使用调整后的R²，写上这句话：</p>
+<img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720195044760.png" alt="image-20220720195044760" style="zoom:67%;">
+
+<p>2）序号2的地方在使用robust之后会有另外的一列标准误，这是为了解决异方差的问题</p>
+<p>3）序号3的位置对应每个变量的显著性检验，当显著性检验结果小于0.05&#x2F;0.1时，表示在对应的置信水平下回归系数异于0，否则即使回归系数绝对值再大也无意义，在解释时我们只需解释显著的自变量前的回归系数即可</p>
+<h4 id="4-内生性问题"><a href="#4-内生性问题" class="headerlink" title="4.内生性问题"></a>4.内生性问题</h4><p>有时候我们引入了新的自变量，比如我们探讨定价（因变量）的形成，已经有了产品品质这一变量，但我们又引入了产品价格这一新的自变量，发现引入之后原来的产品品质这一变量的回归系数变化较大，造成其原因为：遗漏变量导致的内生性</p>
+<img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720202016721.png" alt="image-20220720202016721" style="zoom: 67%;">
+
+<img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720202040564.png" alt="image-20220720202040564" style="zoom:67%;">
+
+<h4 id="5-异方差问题"><a href="#5-异方差问题" class="headerlink" title="5.异方差问题"></a>5.异方差问题</h4><p>这是扰动项u要满足的条件之一：（自相关是下面的多重共线性问题）</p>
+<img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720195457471.png" alt="image-20220720195457471" style="zoom: 80%;">
+
+<h5 id="（1）异方差带来的问题"><a href="#（1）异方差带来的问题" class="headerlink" title="（1）异方差带来的问题"></a>（1）异方差带来的问题</h5><img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720195712880.png" alt="image-20220720195712880" style="zoom:67%;">
+
+<h5 id="（2）异方差问题的检验"><a href="#（2）异方差问题的检验" class="headerlink" title="（2）异方差问题的检验"></a>（2）异方差问题的检验</h5><p>方法一：BP检验</p>
+<img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720195957500.png" alt="image-20220720195957500" style="zoom:67%;">
+
+<p>BP检验结果：</p>
+<p><img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720200029997.png" alt="image-20220720200029997"></p>
+<p>方法二：怀特检验：</p>
+<img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720200135406.png" alt="image-20220720200135406" style="zoom:80%;">
+
+<h5 id="（3）解决方法"><a href="#（3）解决方法" class="headerlink" title="（3）解决方法"></a>（3）解决方法</h5><img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720195833480.png" alt="image-20220720195833480" style="zoom:67%;">
+
+<p>在论文中加上一句 Stock and Watson (2011)推荐，在大多数情况下应该使用“OLS + 稳健标准误”，然后用第一种方法即可</p>
+<blockquote>
+<p>我的意见是，直接用OLS+稳健的标准误</p>
+</blockquote>
+<h5 id="（4）OLS-稳健标准误"><a href="#（4）OLS-稳健标准误" class="headerlink" title="（4）OLS+稳健标准误"></a>（4）OLS+稳健标准误</h5><p>这样就会多一列，这列就是稳健的标准误，这样得出的相关系数对于的显著性检验才是合理的</p>
+<img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720200242711.png" alt="image-20220720200242711" style="zoom:50%;">
+
+<h4 id="6-多重共线性问题"><a href="#6-多重共线性问题" class="headerlink" title="6.多重共线性问题"></a>6.多重共线性问题</h4><h5 id="（1）完全多重共线性问题"><a href="#（1）完全多重共线性问题" class="headerlink" title="（1）完全多重共线性问题"></a>（1）完全多重共线性问题</h5><p>这里涉及到多分类虚拟变量的设置，对于多分类虚拟变量的设置，比如说要用虚拟变量表示各个省份，这里使用类似于单热点编码的方法进行，但是需要剔除一个变量作为对照组，否则将带来完全多重共线性问题。比如：性别时只用了female而没有用两个变量</p>
+<blockquote>
+<p>对于多分类虚拟变量的产生：（加上gen(A)即可）</p>
+<img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720200810680.png" alt="image-20220720200810680" style="zoom:67%;">
+</blockquote>
+<p>（对于普通的回归来说，stata会自动剔除一个，所以你也不用自己来了）</p>
+<h5 id="（2）非完全的多重共线性问题"><a href="#（2）非完全的多重共线性问题" class="headerlink" title="（2）非完全的多重共线性问题"></a>（2）非完全的多重共线性问题</h5><h6 id="1）常见症状"><a href="#1）常见症状" class="headerlink" title="1）常见症状"></a>1）常见症状</h6><img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720201015378.png" alt="image-20220720201015378" style="zoom:67%;">
+
+<p>比如说这道题，探究单产和一堆费用之间的关系，就体现出这样的症状了</p>
+<img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720201111182.png" alt="image-20220720201111182" style="zoom: 67%;">
+
+<h6 id="2）检验多重共线性"><a href="#2）检验多重共线性" class="headerlink" title="2）检验多重共线性"></a>2）检验多重共线性</h6><img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720201313153.png" alt="image-20220720201313153" style="zoom:67%;">
+
+<h6 id="3）处理方法"><a href="#3）处理方法" class="headerlink" title="3）处理方法"></a>3）处理方法</h6><img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720201348995.png" alt="image-20220720201348995" style="zoom: 67%;">
+
+<p>虽然但是，我们一般会剔除那些VIF较大的变量，或者用逐步回归分析</p>
+<h6 id="4）逐步回归分析"><a href="#4）逐步回归分析" class="headerlink" title="4）逐步回归分析"></a>4）逐步回归分析</h6><img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720201446627.png" alt="image-20220720201446627" style="zoom:67%;">
+
+<p>推荐用向后逐步回归分析</p>
+<p>实现：注意下面的#1和#2是显著水平，一般0.05</p>
+<img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720201538791.png" alt="image-20220720201538791" style="zoom:67%;">
+
+<p>同时在使用的过程中，<strong>逐步回归分析不会自己剔除造成完全多重共线性问题的虚拟变量，需要自己剔除（看看普通的咋剔除的）</strong></p>
+<img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720201722573.png" alt="image-20220720201722573" style="zoom: 67%;">
+
+<h3 id="三、数据的统计描述"><a href="#三、数据的统计描述" class="headerlink" title="三、数据的统计描述"></a>三、数据的统计描述</h3><p>对于提供数据的题目，最好做个统计描述，用excel、matlab、stata都行</p>
+<ul>
+<li><p>excel:数据-数据分析-描述统计</p>
+</li>
+<li><p>stata如下:</p>
+<img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720202331213.png" alt="image-20220720202331213" style="zoom:50%;">
+
+<img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720202344605.png" alt="image-20220720202344605" style="zoom:50%;">
+
+<p>对于回归而言，再列个下面的表：</p>
+<p><img src="/2022/07/20/7-%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/image-20220720202430716.png" alt="image-20220720202430716"></p>
+</li>
+</ul>
+]]></content>
+      <categories>
+        <category>数模</category>
+      </categories>
+      <tags>
+        <tag>回归</tag>
       </tags>
   </entry>
 </search>
